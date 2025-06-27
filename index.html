@@ -192,10 +192,6 @@
                 <input type="number" id="offer-original-price" placeholder="原價" class="p-2 border rounded-md w-full mb-2" required min="0">
                 <input type="number" id="offer-special-price" placeholder="特價" class="p-2 border rounded-md w-full mb-4" required min="0">
                 <input type="text" id="offer-image" placeholder="圖片URL (placehold.co)" class="p-2 border rounded-md w-full mb-4">
-                <div class="col-span-full mb-4" id="offer-image-preview-container" style="display:none;">
-                    <p class="text-sm text-gray-600 mb-2">圖片預覽:</p>
-                    <img id="offer-image-preview" src="" alt="圖片預覽" class="max-w-xs h-32 object-contain border border-gray-300 rounded-md">
-                </div>
                 <div class="flex gap-2 flex-wrap justify-center">
                     <button id="add-offer" class="btn-purple">新增優惠</button>
                     <button id="update-offer" class="btn-yellow">更新選定優惠</button>
@@ -282,9 +278,6 @@
             const offerOriginalPriceInput = document.getElementById('offer-original-price');
             const offerSpecialPriceInput = document.getElementById('offer-special-price');
             const offerImageInput = document.getElementById('offer-image');
-            const offerImagePreviewContainer = document.getElementById('offer-image-preview-container');
-            const offerImagePreview = document.getElementById('offer-image-preview');
-
 
             // --- Custom Modal Elements ---
             const adminMessageModal = document.getElementById('adminMessageModal');
@@ -487,14 +480,6 @@
                             offerOriginalPriceInput.value = offerToEdit.originalPrice;
                             offerSpecialPriceInput.value = offerToEdit.specialPrice;
                             offerImageInput.value = offerToEdit.image;
-                            // Show image preview for editing
-                            if (offerToEdit.image) {
-                                offerImagePreview.src = offerToEdit.image;
-                                offerImagePreviewContainer.style.display = 'block';
-                            } else {
-                                offerImagePreviewContainer.style.display = 'none';
-                                offerImagePreview.src = '';
-                            }
                         }
                     });
                 });
@@ -555,8 +540,6 @@
                 offerOriginalPriceInput.value = '';
                 offerSpecialPriceInput.value = '';
                 offerImageInput.value = '';
-                offerImagePreviewContainer.style.display = 'none';
-                offerImagePreview.src = '';
             }
 
             // --- Event Listeners ---
@@ -700,22 +683,6 @@
             });
 
             clearOfferFormBtn.addEventListener('click', clearOfferForm);
-
-            // Image preview functionality for offers
-            offerImageInput.addEventListener('input', () => {
-                const imageUrl = offerImageInput.value;
-                if (imageUrl) {
-                    offerImagePreview.src = imageUrl;
-                    offerImagePreviewContainer.style.display = 'block';
-                    // Optional: Add error handling for broken image links
-                    offerImagePreview.onerror = () => {
-                        offerImagePreview.src = 'https://placehold.co/100x100/CCCCCC/AAAAAA?text=圖片載入失敗';
-                    };
-                } else {
-                    offerImagePreviewContainer.style.display = 'none';
-                    offerImagePreview.src = '';
-                }
-            });
 
             // Initial load for admin panel when opened
             loadCoffeeBeans();
