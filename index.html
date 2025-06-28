@@ -23,7 +23,7 @@
         h1, h2, h3 {
             color: #b58863;
         }
-        input[type="text"], input[type="number"], input[type="date"], textarea, select {
+        input[type="text"], input[type="number"], input[type=\"date\"], textarea, select {
             border: 1px solid #ddd;
             padding: 8px;
             border-radius: 4px;
@@ -207,314 +207,419 @@
     </div>
 
     <script>
+        'use strict';
+        (function() { // Start IIFE
+
+        // 📦 dataManager.js - 統一優惠資料管理模組
+        // 這部分是您提供的 dataManager.js 內容，直接嵌入到 HTML 中以確保可用性
+        const defaultOfferTemplate = {
+            id: 0,
+            name: '',
+            description: '',
+            originalPrice: 0,
+            specialPrice: 0,
+            image: ''
+        };
+
+        const SPECIAL_OFFERS_KEY = 'melodySpecialOffers';
+
+        // 新增預設優惠活動資料，確保前後台預設值一致
+        const DEFAULT_SPECIAL_OFFERS = [
+            { id: 101, name: '預設優惠：系統初始體驗包', description: '這是系統預設的優惠，如果localStorage中沒有數據，將會顯示此優惠。', originalPrice: 500, specialPrice: 400, image: 'https://placehold.co/400x200/b58863/FFFFFF?text=Default+Offer' }
+        ];
+
+        /**
+         * 🧠 mergeWithDefaultSchema
+         * 將輸入的每筆資料補齊為與預設欄位一致的格式
+         * @param {Array<Object>} dataArray - 原始優惠資料
+         * @param {Object} defaultTemplate - 欄位模板
+         * @returns {Array<Object>}
+         */
+        function mergeWithDefaultSchema(dataArray, defaultTemplate) {
+            if (!Array.isArray(dataArray)) return [];
+            return dataArray.map(item => ({
+                ...defaultTemplate,
+                ...item
+            }));
+        }
+
+        /**
+         * 📥 loadOffersFromLocalStorage
+         * 從 localStorage 讀取優惠資料，並補齊欄位格式
+         * @returns {Array<Object>}
+         */
+        function loadOffersFromLocalStorage() {
+            try {
+                const rawData = JSON.parse(localStorage.getItem(SPECIAL_OFFERS_KEY));
+                return mergeWithDefaultSchema(rawData || [], defaultOfferTemplate);
+            } catch (e) {
+                console.error('[優惠資料載入失敗]', e);
+                return [];
+            }
+        }
+
+        /**
+         * 📤 saveOffersToLocalStorage
+         * 將優惠資料儲存至 localStorage
+         * @param {Array<Object>} offers
+         */
+        function saveOffersToLocalStorage(offers) {
+            try {
+                localStorage.setItem(SPECIAL_OFFERS_KEY, JSON.stringify(offers));
+            } catch (e) {
+                console.error('[優惠資料儲存失敗]', e);
+            }
+        }
+
+        /**
+         * 🗑 clearOffers
+         * 清除 localStorage 中的優惠資料
+         */
+        function clearOffers() {
+            localStorage.removeItem(SPECIAL_OFFERS_KEY);
+        }
+
+        // ✅ 全域掛載模組，供前後台呼叫
+        window.OfferDataManager = {
+            loadOffersFromLocalStorage,
+            saveOffersToLocalStorage,
+            clearOffers,
+            mergeWithDefaultSchema,
+            defaultOfferTemplate,
+            DEFAULT_SPECIAL_OFFERS // 將統一的預設優惠資料匯出
+        };
+        // 📦 dataManager.js END
+
+        // --- Local Storage Keys ---
+        const COFFEE_BEANS_KEY = 'melodyCoffeeBeans';
+
+        // --- Default Data (Hardcoded for initial setup if localStorage is empty) ---
+        const defaultCoffeeBeans = [
+            { id: 1, name: 'GEISHA 水洗（114g）', country: '衣索比亞', variety: 'GEISHA 水洗', flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬、百香果', roast: '淺焙', weight: '114g', expiryDate: '2025-10-12', price: 280, stock: 10, category: 'light', image: './image/image_1.png', flavorProfile: { acidity: 4, body: 2, sweetness: 4, aroma: 5, finish: 4 }, lifestyle: '這款咖啡充滿複雜的香氣與明亮的風味，適合在靜謐的午後細細品味，或搭配輕盈的甜點。' },
+            { id: 2, name: 'Heirloom 雙重厭氧（227g）- 批次A', country: '衣索比亞', variety: 'Heirloom', flavor: '茉莉、橙花、蜂蜜、水蜜桃', roast: '淺焙', weight: '227g', expiryDate: '2025-10-28', price: 600, stock: 5, category: 'light', image: './image/image_2.png', flavorProfile: { acidity: 4, body: 3, sweetness: 5, aroma: 5, finish: 4 }, lifestyle: '甜美而豐富的口感，是開啟美好一天的理想選擇，與早餐糕點搭配尤佳。' },
+            { id: 3, name: 'Heirloom 雙重厭氧（227g）- 批次B', country: '衣索比亞', variety: 'Heirloom', flavor: '茉莉、橙花、蜂蜜、水蜜桃', roast: '淺焙', weight: '227g', expiryDate: '2025-10-31', price: 600, stock: 8, category: 'light', image: './image/image_3.png', flavorProfile: { acidity: 4, body: 3, sweetness: 5, aroma: 5, finish: 4 }, lifestyle: '相同的風味，不同的採收批次，確保每一杯都有始終如一的甜蜜與芬芳。' },
+            { id: 4, name: 'GEISHA（227g）中淺焙', country: '衣索比亞', variety: 'GEISHA', flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬', roast: '中淺焙', weight: '227g', expiryDate: '2025-11-01', price: 540, stock: 12, category: 'medium', image: './image/image_4.png', flavorProfile: { acidity: 3, body: 3, sweetness: 3, aroma: 4, finish: 3 }, lifestyle: '平衡的風味與較低的酸度，適合日常飲用，無論是搭配閱讀或工作，都能帶來愉悅感受。' },
+            { id: 5, name: 'GEISHA 水洗（227g）2280m', country: '衣索比亞', variety: 'GEISHA 水洗', flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬', roast: '中淺焙', weight: '227g', expiryDate: '2025-11-05', price: 580, stock: 0, category: 'light', image: './image/image_5.png', flavorProfile: { acidity: 4, body: 2, sweetness: 4, aroma: 5, finish: 4 }, lifestyle: '來自高海拔的獨特風味，建議在需要提振精神的早晨品嚐，感受其清晰明亮的層次。' },
+            { id: 6, name: '衣索比亞 淺焙（227g）', country: '衣索比亞', variety: '', flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬', roast: '淺焙', weight: '227g', expiryDate: '2025-11-01', price: 540, stock: 7, category: 'light', image: './image/image_6.png', flavorProfile: { acidity: 4, body: 2, sweetness: 4, aroma: 5, finish: 4 }, lifestyle: '輕盈的花果調性，是下午茶時光的完美伴侶，能為您的休憩時刻增添一抹亮色。' },
+            { id: 7, name: '哥斯大黎加 Geisha 白蜜（114g）', country: '哥斯大黎加', variety: 'Geisha（藝妓）', flavor: '百合花、野薑花、檸檬草、柑橘、紅色莓果、蜂蜜', roast: '淺焙', weight: '114g', expiryDate: '2025-08-15', price: 800, stock: 3, category: 'light', image: './image/image_7.png', flavorProfile: { acidity: 5, body: 3, sweetness: 4, aroma: 5, finish: 4 }, lifestyle: '此款藝妓咖啡風味精緻優雅，適合在重要時刻或與好友分享，搭配簡約的甜點以突顯其豐富層次。' },
+            { id: 8, name: '哥斯大黎加 淺焙（227g）', country: '哥斯大黎加', variety: '', flavor: '百合花、野薑花、檸檬草、柑橘、紅色莓果、蜂蜜', roast: '淺焙', weight: '227g', expiryDate: '2025-08-15', price: 1800, stock: 1, category: 'light', image: './image/image_8.png', flavorProfile: { acidity: 5, body: 3, sweetness: 4, aroma: 5, finish: 4 }, lifestyle: '大容量包裝讓您能更長時間地享受藝妓咖啡的迷人魅力，每日品飲或作為珍貴贈禮皆宜。' }
+        ];
+
+        // --- Data Variables (will be loaded from/saved to localStorage) ---
+        let coffeeBeans = [];
+        let specialOffers = []; // This will now be populated by OfferDataManager
+        let reviews = []; 
+
+        let radarChart; // Chart.js instance
+
+
+        // --- DOM Elements ---
+        const adminCoffeeList = document.getElementById('admin-coffee-list');
+        const loadCoffeeBtn = document.getElementById('load-coffee-data');
+        const saveCoffeeBtn = document.getElementById('save-coffee-data');
+        const addCoffeeBtn = document.getElementById('add-coffee');
+        const updateCoffeeBtn = document.getElementById('update-coffee');
+        const clearCoffeeFormBtn = document.getElementById('clear-coffee-form');
+
+        const editCoffeeIdInput = document.getElementById('edit-coffee-id');
+        const coffeeNameInput = document.getElementById('coffee-name');
+        const coffeeCountryInput = document.getElementById('coffee-country');
+        const coffeeVarietyInput = document.getElementById('coffee-variety');
+        const coffeeFlavorInput = document.getElementById('coffee-flavor');
+        const coffeeRoastInput = document.getElementById('coffee-roast');
+        const coffeeWeightInput = document.getElementById('coffee-weight');
+        const coffeePriceInput = document.getElementById('coffee-price');
+        const coffeeExpiryInput = document.getElementById('coffee-expiry');
+        const coffeeStockInput = document.getElementById('coffee-stock'); // NEW
+        const coffeeCategoryInput = document.getElementById('coffee-category');
+        const coffeeImageInput = document.getElementById('coffee-image');
+        const coffeeLifestyleInput = document.getElementById('coffee-lifestyle');
+
+        const fpAcidityInput = document.getElementById('fp-acidity');
+        const fpBodyInput = document.getElementById('fp-body');
+        const fpSweetnessInput = document.getElementById('fp-sweetness');
+        const fpAromaInput = document.getElementById('fp-aroma');
+        const fpFinishInput = document.getElementById('fp-finish');
+
+
+        const adminOfferList = document.getElementById('admin-offer-list');
+        const loadOfferBtn = document.getElementById('load-offer-data');
+        const saveOfferBtn = document.getElementById('save-offer-data');
+        const addOfferBtn = document.getElementById('add-offer');
+        const updateOfferBtn = document.getElementById('update-offer');
+        const clearOfferFormBtn = document.getElementById('clear-offer-form');
+
+        const editOfferIdInput = document.getElementById('edit-offer-id');
+        const offerNameInput = document.getElementById('offer-name');
+        const offerDescriptionInput = document.getElementById('offer-description');
+        const offerOriginalPriceInput = document.getElementById('offer-original-price');
+        const offerSpecialPriceInput = document.getElementById('offer-special-price');
+        const offerImageInput = document.getElementById('offer-image');
+
+        // --- Admin Message Modal Elements ---
+        const adminMessageModal = document.getElementById('adminMessageModal');
+        const adminModalTitle = document.getElementById('adminModalTitle');
+        const adminModalMessage = document.getElementById('adminModalMessage');
+
+        /**
+         * Shows the custom admin message modal.
+         * @param {string} title - The title of the message.
+         * @param {string} message - The message content.
+         * @param {string} type - 'success' or 'error' to change title color.
+         * @param {function} [onConfirm] - Optional callback function for confirm type modals.
+         * @param {boolean} [isConfirm=false] - Whether this modal is a confirmation dialog.
+         */
+        function showAdminMessageModal(title, message, type = 'info', onConfirm = null, isConfirm = false) {
+            adminModalTitle.textContent = title;
+            adminModalMessage.textContent = message;
+            adminModalTitle.classList.remove('admin-modal-success', 'admin-modal-error');
+            
+            const confirmButton = adminMessageModal.querySelector('button');
+            const originalButtonText = "了解"; // Default button text
+            confirmButton.onclick = closeAdminMessageModal; // Default close action
+
+            if (type === 'success') {
+                adminModalTitle.classList.add('admin-modal-success');
+            } else if (type === 'error') {
+                adminModalTitle.classList.add('admin-modal-error');
+            }
+
+            if (isConfirm && onConfirm) {
+                confirmButton.textContent = "確認";
+                confirmButton.onclick = () => {
+                    onConfirm();
+                    closeAdminMessageModal();
+                };
+                // You might add a "Cancel" button here for true confirmations if needed.
+                // For simplicity, keeping it as one button that triggers action then closes.
+            } else {
+                confirmButton.textContent = originalButtonText;
+            }
+            adminMessageModal.style.display = 'flex';
+        }
+
+        /**
+         * Closes the custom admin message modal.
+         */
+        function closeAdminMessageModal() {
+            adminMessageModal.style.display = 'none';
+        }
+
+
+        // --- Helper Functions ---
+        /**
+         * Generates a simple pseudo-unique ID.
+         * In a real app, use UUIDs or backend-generated IDs.
+         */
+        function generateId() {
+            return Date.now() + Math.floor(Math.random() * 1000);
+        }
+
+        // --- Coffee Bean Functions ---
+        function renderCoffeeBeansAdmin() {
+            adminCoffeeList.innerHTML = '';
+            if (coffeeBeans.length === 0) {
+                adminCoffeeList.innerHTML = '<li>目前沒有咖啡豆數據。</li>';
+                return;
+            }
+            coffeeBeans.forEach(bean => {
+                const listItem = document.createElement('li');
+                listItem.dataset.id = bean.id;
+                // Display updated fields including stock
+                listItem.innerHTML = `
+                    <span>${bean.name} (NT$${bean.price}) - 庫存: ${bean.stock}</span>
+                    <div>
+                        <button class="btn-yellow text-sm py-1 px-2 mr-1 edit-coffee-btn">編輯</button>
+                        <button class="btn-red text-sm py-1 px-2 delete-coffee-btn">刪除</button>
+                    </div>
+                `;
+                adminCoffeeList.appendChild(listItem);
+            });
+
+            // Attach event listeners for edit and delete
+            document.querySelectorAll('.edit-coffee-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const id = e.target.closest('li').dataset.id;
+                    const beanToEdit = coffeeBeans.find(b => b.id == id);
+                    if (beanToEdit) {
+                        editCoffeeIdInput.value = beanToEdit.id;
+                        coffeeNameInput.value = beanToEdit.name;
+                        coffeeCountryInput.value = beanToEdit.country || '';
+                        coffeeVarietyInput.value = beanToEdit.variety || '';
+                        coffeeFlavorInput.value = beanToEdit.flavor;
+                        coffeeRoastInput.value = beanToEdit.roast || '';
+                        coffeeWeightInput.value = beanToEdit.weight || '';
+                        coffeePriceInput.value = beanToEdit.price;
+                        coffeeExpiryInput.value = beanToEdit.expiryDate;
+                        coffeeStockInput.value = beanToEdit.stock; // Populate stock field
+                        coffeeCategoryInput.value = beanToEdit.category || '';
+                        coffeeImageInput.value = beanToEdit.image;
+                        coffeeLifestyleInput.value = beanToEdit.lifestyle;
+
+                        // Populate flavor profile inputs
+                        if (beanToEdit.flavorProfile) {
+                            fpAcidityInput.value = beanToEdit.flavorProfile.acidity || 0;
+                            fpBodyInput.value = beanToEdit.flavorProfile.body || 0;
+                            fpSweetnessInput.value = beanToEdit.flavorProfile.sweetness || 0;
+                            fpAromaInput.value = beanToEdit.flavorProfile.aroma || 0;
+                            fpFinishInput.value = beanToEdit.flavorProfile.finish || 0;
+                        } else {
+                            // Clear if no flavor profile exists
+                            fpAcidityInput.value = '';
+                            fpBodyInput.value = '';
+                            fpSweetnessInput.value = '';
+                            fpAromaInput.value = '';
+                            fpFinishInput.value = '';
+                        }
+                    }
+                });
+            });
+
+            document.querySelectorAll('.delete-coffee-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.closest('li').dataset.id);
+                    showAdminMessageModal('確認刪除', '確定要刪除此咖啡豆嗎？', 'info', () => {
+                        coffeeBeans = coffeeBeans.filter(bean => bean.id !== id);
+                        saveCoffeeBeans(); // Save immediately after delete
+                        renderCoffeeBeansAdmin();
+                        clearCoffeeForm();
+                        showAdminMessageModal('成功', '咖啡豆已刪除！', 'success');
+                    }, true); // Pass true for confirmation
+                });
+            });
+        }
+
+        function loadCoffeeBeans() {
+            let storedBeans = JSON.parse(localStorage.getItem(COFFEE_BEANS_KEY));
+            if (Array.isArray(storedBeans) && storedBeans.length > 0) {
+                // Merge existing data with default structure to ensure new fields are present
+                // This handles cases where localStorage might have old schema
+                coffeeBeans = storedBeans.map(bean => ({
+                    // Ensure 'stock' is included even if not in old stored data
+                    stock: 0, // Default for new 'stock' field if missing
+                    ...defaultCoffeeBeans[0], // Use a template from default to ensure all keys exist
+                    ...bean // Overlay existing values
+                }));
+            } else {
+                coffeeBeans = [...defaultCoffeeBeans]; // Use spread to avoid modifying default array directly
+                // If localStorage is empty, save the default beans to it
+                localStorage.setItem(COFFEE_BEANS_KEY, JSON.stringify(defaultCoffeeBeans));
+            }
+            renderCoffeeBeansAdmin();
+            clearCoffeeForm();
+            showAdminMessageModal('載入成功', '咖啡豆數據已載入。', 'success');
+            console.log('Coffee beans loaded (Admin).');
+        }
+
+        function saveCoffeeBeans() {
+            localStorage.setItem(COFFEE_BEANS_KEY, JSON.stringify(coffeeBeans));
+            showAdminMessageModal('儲存成功', '咖啡豆數據已儲存！', 'success');
+            console.log('Coffee beans saved (Admin).');
+        }
+
+        function clearCoffeeForm() {
+            editCoffeeIdInput.value = '';
+            coffeeNameInput.value = '';
+            coffeeCountryInput.value = '';
+            coffeeVarietyInput.value = '';
+            coffeeFlavorInput.value = '';
+            coffeeRoastInput.value = '';
+            coffeeWeightInput.value = '';
+            coffeePriceInput.value = '';
+            coffeeExpiryInput.value = '';
+            coffeeStockInput.value = ''; // Clear stock field
+            coffeeCategoryInput.value = '';
+            coffeeImageInput.value = '';
+            coffeeLifestyleInput.value = '';
+            fpAcidityInput.value = '';
+            fpBodyInput.value = '';
+            fpSweetnessInput.value = '';
+            fpAromaInput.value = '';
+            fpFinishInput.value = '';
+        }
+
+        // --- Special Offer Functions ---
+        function renderSpecialOffersAdmin() {
+            adminOfferList.innerHTML = '';
+            if (specialOffers.length === 0) {
+                adminOfferList.innerHTML = '<li>目前沒有優惠活動數據。</li>';
+                return;
+            }
+            specialOffers.forEach(offer => {
+                const listItem = document.createElement('li');
+                listItem.dataset.id = offer.id;
+                listItem.innerHTML = `
+                    <span>${offer.name} (NT$${offer.specialPrice})</span>
+                    <div>
+                        <button class="btn-yellow text-sm py-1 px-2 mr-1 edit-offer-btn">編輯</button>
+                        <button class="btn-red text-sm py-1 px-2 delete-offer-btn">刪除</button>
+                    </div>
+                `;
+                adminOfferList.appendChild(listItem);
+            });
+
+            // Attach event listeners for edit and delete
+            document.querySelectorAll('.edit-offer-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const id = e.target.closest('li').dataset.id;
+                    const offerToEdit = specialOffers.find(o => o.id == id);
+                    if (offerToEdit) {
+                        editOfferIdInput.value = offerToEdit.id;
+                        offerNameInput.value = offerToEdit.name;
+                        offerDescriptionInput.value = offerToEdit.description;
+                        offerOriginalPriceInput.value = offerToEdit.originalPrice;
+                        offerSpecialPriceInput.value = offerToEdit.specialPrice;
+                        offerImageInput.value = offerToEdit.image;
+                    }
+                });
+            });
+
+            document.querySelectorAll('.delete-offer-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.closest('li').dataset.id);
+                    showAdminMessageModal('確認刪除', '確定要刪除此優惠嗎？', 'info', () => {
+                        specialOffers = specialOffers.filter(offer => offer.id !== id);
+                        saveSpecialOffers(); // Save immediately after delete
+                        renderSpecialOffersAdmin();
+                        clearOfferForm();
+                        showAdminMessageModal('成功', '優惠活動已刪除！', 'success');
+                    }, true); // Pass true for confirmation
+                });
+            });
+        }
+
+        function loadSpecialOffers() {
+            // Use the new OfferDataManager to load data
+            specialOffers = window.OfferDataManager.loadOffersFromLocalStorage();
+            // If localStorage is empty and OfferDataManager returns empty, seed with the centralized default offers
+            if (specialOffers.length === 0) {
+                specialOffers = window.OfferDataManager.mergeWithDefaultSchema(window.OfferDataManager.DEFAULT_SPECIAL_OFFERS, window.OfferDataManager.defaultOfferTemplate);
+                window.OfferDataManager.saveOffersToLocalStorage(specialOffers); // Save to populate localStorage
+            }
+            renderSpecialOffersAdmin();
+            clearOfferForm();
+            showAdminMessageModal('載入成功', '優惠數據已載入。', 'success');
+            console.log('Special offers loaded (Admin).');
+        }
+
+        function saveSpecialOffers() {
+            // Use the new OfferDataManager to save data
+            window.OfferDataManager.saveOffersToLocalStorage(specialOffers);
+            showAdminMessageModal('儲存成功', '優惠數據已儲存！', 'success');
+            console.log('Special offers saved (Admin).');
+        }
+
+        function clearOfferForm() {
+            editOfferIdInput.value = '';
+            offerNameInput.value = '';
+            offerDescriptionInput.value = '';
+            offerOriginalPriceInput.value = '';
+            offerSpecialPriceInput.value = '';
+            offerImageInput.value = '';
+        }
+
+        // --- Event Listeners ---
         document.addEventListener('DOMContentLoaded', () => {
-            // --- Local Storage Keys ---
-            const COFFEE_BEANS_KEY = 'melodyCoffeeBeans';
-            const SPECIAL_OFFERS_KEY = 'melodySpecialOffers';
-
-            // --- Default Data (Hardcoded for initial setup if localStorage is empty) ---
-            const defaultCoffeeBeans = [
-                { id: 1, name: 'GEISHA 水洗（114g）', country: '衣索比亞', variety: 'GEISHA 水洗', flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬、百香果', roast: '淺焙', weight: '114g', expiryDate: '2025-10-12', price: 280, stock: 10, category: 'light', image: './image/image_1.png', flavorProfile: { acidity: 4, body: 2, sweetness: 4, aroma: 5, finish: 4 }, lifestyle: '這款咖啡充滿複雜的香氣與明亮的風味，適合在靜謐的午後細細品味，或搭配輕盈的甜點。' },
-                { id: 2, name: 'Heirloom 雙重厭氧（227g）- 批次A', country: '衣索比亞', variety: 'Heirloom', flavor: '茉莉、橙花、蜂蜜、水蜜桃', roast: '淺焙', weight: '227g', expiryDate: '2025-10-28', price: 600, stock: 5, category: 'light', image: './image/image_2.png', flavorProfile: { acidity: 4, body: 3, sweetness: 5, aroma: 5, finish: 4 }, lifestyle: '甜美而豐富的口感，是開啟美好一天的理想選擇，與早餐糕點搭配尤佳。' },
-                { id: 3, name: 'Heirloom 雙重厭氧（227g）- 批次B', country: '衣索比亞', variety: 'Heirloom', flavor: '茉莉、橙花、蜂蜜、水蜜桃', roast: '淺焙', weight: '227g', expiryDate: '2025-10-31', price: 600, stock: 8, category: 'light', image: './image/image_3.png', flavorProfile: { acidity: 4, body: 3, sweetness: 5, aroma: 5, finish: 4 }, lifestyle: '相同的風味，不同的採收批次，確保每一杯都有始終如一的甜蜜與芬芳。' },
-                { id: 4, name: 'GEISHA（227g）中淺焙', country: '衣索比亞', variety: 'GEISHA', flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬', roast: '中淺焙', weight: '227g', expiryDate: '2025-11-01', price: 540, stock: 12, category: 'medium', image: './image/image_4.png', flavorProfile: { acidity: 3, body: 3, sweetness: 3, aroma: 4, finish: 3 }, lifestyle: '平衡的風味與較低的酸度，適合日常飲用，無論是搭配閱讀或工作，都能帶來愉悅感受。' },
-                { id: 5, name: 'GEISHA 水洗（227g）2280m', country: '衣索比亞', variety: 'GEISHA 水洗', flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬', roast: '中淺焙', weight: '227g', expiryDate: '2025-11-05', price: 580, stock: 0, category: 'light', image: './image/image_5.png', flavorProfile: { acidity: 4, body: 2, sweetness: 4, aroma: 5, finish: 4 }, lifestyle: '來自高海拔的獨特風味，建議在需要提振精神的早晨品嚐，感受其清晰明亮的層次。' },
-                { id: 6, name: '衣索比亞 淺焙（227g）', country: '衣索比亞', variety: '', flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬', roast: '淺焙', weight: '227g', expiryDate: '2025-11-01', price: 540, stock: 7, category: 'light', image: './image/image_6.png', flavorProfile: { acidity: 4, body: 2, sweetness: 4, aroma: 5, finish: 4 }, lifestyle: '輕盈的花果調性，是下午茶時光的完美伴侶，能為您的休憩時刻增添一抹亮色。' },
-                { id: 7, name: '哥斯大黎加 Geisha 白蜜（114g）', country: '哥斯大黎加', variety: 'Geisha（藝妓）', flavor: '百合花、野薑花、檸檬草、柑橘、紅色莓果、蜂蜜', roast: '淺焙', weight: '114g', expiryDate: '2025-08-15', price: 800, stock: 3, category: 'light', image: './image/image_7.png', flavorProfile: { acidity: 5, body: 3, sweetness: 4, aroma: 5, finish: 4 }, lifestyle: '此款藝妓咖啡風味精緻優雅，適合在重要時刻或與好友分享，搭配簡約的甜點以突顯其豐富層次。' },
-                { id: 8, name: '哥斯大黎加 淺焙（227g）', country: '哥斯大黎加', variety: '', flavor: '百合花、野薑花、檸檬草、柑橘、紅色莓果、蜂蜜', roast: '淺焙', weight: '227g', expiryDate: '2025-08-15', price: 1800, stock: 1, category: 'light', image: './image/image_8.png', flavorProfile: { acidity: 5, body: 3, sweetness: 4, aroma: 5, finish: 4 }, lifestyle: '大容量包裝讓您能更長時間地享受藝妓咖啡的迷人魅力，每日品飲或作為珍貴贈禮皆宜。' }
-            ];
-
-            const defaultSpecialOffers = [
-                { id: 101, name: '本月特選：精品咖啡豆組合', description: '嚴選三款不同風味的精品咖啡豆，一次滿足您的味蕾探險。', originalPrice: 1200, specialPrice: 990, image: 'https://placehold.co/400x250/b58863/FFFFFF?text=咖啡組合' }
-            ];
-
-            // --- Data Variables (will be loaded from/saved to localStorage) ---
-            let coffeeBeans = [];
-            let specialOffers = [];
-
-            // --- DOM Elements ---
-            const adminCoffeeList = document.getElementById('admin-coffee-list');
-            const loadCoffeeBtn = document.getElementById('load-coffee-data');
-            const saveCoffeeBtn = document.getElementById('save-coffee-data');
-            const addCoffeeBtn = document.getElementById('add-coffee');
-            const updateCoffeeBtn = document.getElementById('update-coffee');
-            const clearCoffeeFormBtn = document.getElementById('clear-coffee-form');
-
-            const editCoffeeIdInput = document.getElementById('edit-coffee-id');
-            const coffeeNameInput = document.getElementById('coffee-name');
-            const coffeeCountryInput = document.getElementById('coffee-country');
-            const coffeeVarietyInput = document.getElementById('coffee-variety');
-            const coffeeFlavorInput = document.getElementById('coffee-flavor');
-            const coffeeRoastInput = document.getElementById('coffee-roast');
-            const coffeeWeightInput = document.getElementById('coffee-weight');
-            const coffeePriceInput = document.getElementById('coffee-price');
-            const coffeeExpiryInput = document.getElementById('coffee-expiry');
-            const coffeeStockInput = document.getElementById('coffee-stock'); // NEW
-            const coffeeCategoryInput = document.getElementById('coffee-category');
-            const coffeeImageInput = document.getElementById('coffee-image');
-            const coffeeLifestyleInput = document.getElementById('coffee-lifestyle');
-
-            const fpAcidityInput = document.getElementById('fp-acidity');
-            const fpBodyInput = document.getElementById('fp-body');
-            const fpSweetnessInput = document.getElementById('fp-sweetness');
-            const fpAromaInput = document.getElementById('fp-aroma');
-            const fpFinishInput = document.getElementById('fp-finish');
-
-
-            const adminOfferList = document.getElementById('admin-offer-list');
-            const loadOfferBtn = document.getElementById('load-offer-data');
-            const saveOfferBtn = document.getElementById('save-offer-data');
-            const addOfferBtn = document.getElementById('add-offer');
-            const updateOfferBtn = document.getElementById('update-offer');
-            const clearOfferFormBtn = document.getElementById('clear-offer-form');
-
-            const editOfferIdInput = document.getElementById('edit-offer-id');
-            const offerNameInput = document.getElementById('offer-name');
-            const offerDescriptionInput = document.getElementById('offer-description');
-            const offerOriginalPriceInput = document.getElementById('offer-original-price');
-            const offerSpecialPriceInput = document.getElementById('offer-special-price');
-            const offerImageInput = document.getElementById('offer-image');
-
-            // --- Admin Message Modal Elements ---
-            const adminMessageModal = document.getElementById('adminMessageModal');
-            const adminModalTitle = document.getElementById('adminModalTitle');
-            const adminModalMessage = document.getElementById('adminModalMessage');
-
-            /**
-             * Shows the custom admin message modal.
-             * @param {string} title - The title of the message.
-             * @param {string} message - The message content.
-             * @param {string} type - 'success' or 'error' to change title color.
-             */
-            function showAdminMessageModal(title, message, type = 'info') {
-                adminModalTitle.textContent = title;
-                adminModalMessage.textContent = message;
-                adminModalTitle.classList.remove('admin-modal-success', 'admin-modal-error');
-                if (type === 'success') {
-                    adminModalTitle.classList.add('admin-modal-success');
-                } else if (type === 'error') {
-                    adminModalTitle.classList.add('admin-modal-error');
-                }
-                adminMessageModal.style.display = 'flex';
-            }
-
-            /**
-             * Closes the custom admin message modal.
-             */
-            window.closeAdminMessageModal = function() {
-                adminMessageModal.style.display = 'none';
-            };
-
-
-            // --- Helper Functions ---
-            /**
-             * Generates a simple pseudo-unique ID.
-             * In a real app, use UUIDs or backend-generated IDs.
-             */
-            function generateId() {
-                return Date.now() + Math.floor(Math.random() * 1000);
-            }
-
-            // --- Coffee Bean Functions ---
-            function renderCoffeeBeansAdmin() {
-                adminCoffeeList.innerHTML = '';
-                if (coffeeBeans.length === 0) {
-                    adminCoffeeList.innerHTML = '<li>目前沒有咖啡豆數據。</li>';
-                    return;
-                }
-                coffeeBeans.forEach(bean => {
-                    const listItem = document.createElement('li');
-                    listItem.dataset.id = bean.id;
-                    // Display updated fields including stock
-                    listItem.innerHTML = `
-                        <span>${bean.name} (NT$${bean.price}) - 庫存: ${bean.stock}</span>
-                        <div>
-                            <button class="btn-yellow text-sm py-1 px-2 mr-1 edit-coffee-btn">編輯</button>
-                            <button class="btn-red text-sm py-1 px-2 delete-coffee-btn">刪除</button>
-                        </div>
-                    `;
-                    adminCoffeeList.appendChild(listItem);
-                });
-
-                // Attach event listeners for edit and delete
-                document.querySelectorAll('.edit-coffee-btn').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        const id = e.target.closest('li').dataset.id;
-                        const beanToEdit = coffeeBeans.find(b => b.id == id);
-                        if (beanToEdit) {
-                            editCoffeeIdInput.value = beanToEdit.id;
-                            coffeeNameInput.value = beanToEdit.name;
-                            coffeeCountryInput.value = beanToEdit.country || '';
-                            coffeeVarietyInput.value = beanToEdit.variety || '';
-                            coffeeFlavorInput.value = beanToEdit.flavor;
-                            coffeeRoastInput.value = beanToEdit.roast || '';
-                            coffeeWeightInput.value = beanToEdit.weight || '';
-                            coffeePriceInput.value = beanToEdit.price;
-                            coffeeExpiryInput.value = beanToEdit.expiryDate;
-                            coffeeStockInput.value = beanToEdit.stock; // Populate stock field
-                            coffeeCategoryInput.value = beanToEdit.category || '';
-                            coffeeImageInput.value = beanToEdit.image;
-                            coffeeLifestyleInput.value = beanToEdit.lifestyle;
-
-                            // Populate flavor profile inputs
-                            if (beanToEdit.flavorProfile) {
-                                fpAcidityInput.value = beanToEdit.flavorProfile.acidity || 0;
-                                fpBodyInput.value = beanToEdit.flavorProfile.body || 0;
-                                fpSweetnessInput.value = beanToEdit.flavorProfile.sweetness || 0;
-                                fpAromaInput.value = beanToEdit.flavorProfile.aroma || 0;
-                                fpFinishInput.value = beanToEdit.flavorProfile.finish || 0;
-                            } else {
-                                // Clear if no flavor profile exists
-                                fpAcidityInput.value = '';
-                                fpBodyInput.value = '';
-                                fpSweetnessInput.value = '';
-                                fpAromaInput.value = '';
-                                fpFinishInput.value = '';
-                            }
-                        }
-                    });
-                });
-
-                document.querySelectorAll('.delete-coffee-btn').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        const id = parseInt(e.target.closest('li').dataset.id);
-                        showAdminMessageModal('確認刪除', '確定要刪除此咖啡豆嗎？', 'info', () => {
-                            coffeeBeans = coffeeBeans.filter(bean => bean.id !== id);
-                            saveCoffeeBeans(); // Save immediately after delete
-                            renderCoffeeBeansAdmin();
-                            clearCoffeeForm();
-                            showAdminMessageModal('成功', '咖啡豆已刪除！', 'success');
-                        }, true); // Pass true for confirmation
-                    });
-                });
-            }
-
-            function loadCoffeeBeans() {
-                let storedBeans = JSON.parse(localStorage.getItem(COFFEE_BEANS_KEY));
-                if (Array.isArray(storedBeans) && storedBeans.length > 0) {
-                    // Merge existing data with default structure to ensure new fields are present
-                    // This handles cases where localStorage might have old schema
-                    coffeeBeans = storedBeans.map(bean => ({
-                        // Ensure 'stock' is included even if not in old stored data
-                        stock: 0, // Default for new 'stock' field if missing
-                        ...defaultCoffeeBeans[0], // Use a template from default to ensure all keys exist
-                        ...bean // Overlay existing values
-                    }));
-                } else {
-                    coffeeBeans = [...defaultCoffeeBeans]; // Use spread to avoid modifying default array directly
-                }
-                renderCoffeeBeansAdmin();
-                clearCoffeeForm();
-                showAdminMessageModal('載入成功', '咖啡豆數據已載入。', 'success');
-                console.log('Coffee beans loaded (Admin).');
-            }
-
-            function saveCoffeeBeans() {
-                localStorage.setItem(COFFEE_BEANS_KEY, JSON.stringify(coffeeBeans));
-                showAdminMessageModal('儲存成功', '咖啡豆數據已儲存！', 'success');
-                console.log('Coffee beans saved (Admin).');
-            }
-
-            function clearCoffeeForm() {
-                editCoffeeIdInput.value = '';
-                coffeeNameInput.value = '';
-                coffeeCountryInput.value = '';
-                coffeeVarietyInput.value = '';
-                coffeeFlavorInput.value = '';
-                coffeeRoastInput.value = '';
-                coffeeWeightInput.value = '';
-                coffeePriceInput.value = '';
-                coffeeExpiryInput.value = '';
-                coffeeStockInput.value = ''; // Clear stock field
-                coffeeCategoryInput.value = '';
-                coffeeImageInput.value = '';
-                coffeeLifestyleInput.value = '';
-                fpAcidityInput.value = '';
-                fpBodyInput.value = '';
-                fpSweetnessInput.value = '';
-                fpAromaInput.value = '';
-                fpFinishInput.value = '';
-            }
-
-            // --- Special Offer Functions ---
-            function renderSpecialOffersAdmin() {
-                adminOfferList.innerHTML = '';
-                if (specialOffers.length === 0) {
-                    adminOfferList.innerHTML = '<li>目前沒有優惠活動數據。</li>';
-                    return;
-                }
-                specialOffers.forEach(offer => {
-                    const listItem = document.createElement('li');
-                    listItem.dataset.id = offer.id;
-                    listItem.innerHTML = `
-                        <span>${offer.name} (NT$${offer.specialPrice})</span>
-                        <div>
-                            <button class="btn-yellow text-sm py-1 px-2 mr-1 edit-offer-btn">編輯</button>
-                            <button class="btn-red text-sm py-1 px-2 delete-offer-btn">刪除</button>
-                        </div>
-                    `;
-                    adminOfferList.appendChild(listItem);
-                });
-
-                // Attach event listeners for edit and delete
-                document.querySelectorAll('.edit-offer-btn').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        const id = e.target.closest('li').dataset.id;
-                        const offerToEdit = specialOffers.find(o => o.id == id);
-                        if (offerToEdit) {
-                            editOfferIdInput.value = offerToEdit.id;
-                            offerNameInput.value = offerToEdit.name;
-                            offerDescriptionInput.value = offerToEdit.description;
-                            offerOriginalPriceInput.value = offerToEdit.originalPrice;
-                            offerSpecialPriceInput.value = offerToEdit.specialPrice;
-                            offerImageInput.value = offerToEdit.image;
-                        }
-                    });
-                });
-
-                document.querySelectorAll('.delete-offer-btn').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        const id = parseInt(e.target.closest('li').dataset.id);
-                        showAdminMessageModal('確認刪除', '確定要刪除此優惠嗎？', 'info', () => {
-                            specialOffers = specialOffers.filter(offer => offer.id !== id);
-                            saveSpecialOffers(); // Save immediately after delete
-                            renderSpecialOffersAdmin();
-                            clearOfferForm();
-                            showAdminMessageModal('成功', '優惠活動已刪除！', 'success');
-                        }, true); // Pass true for confirmation
-                    });
-                });
-            }
-
-            function loadSpecialOffers() {
-                let storedOffers = JSON.parse(localStorage.getItem(SPECIAL_OFFERS_KEY));
-                if (Array.isArray(storedOffers) && storedOffers.length > 0) {
-                    specialOffers = storedOffers;
-                } else {
-                    specialOffers = [...defaultSpecialOffers]; // Use spread to avoid modifying default array directly
-                }
-                renderSpecialOffersAdmin();
-                clearOfferForm();
-                showAdminMessageModal('載入成功', '優惠數據已載入。', 'success');
-                console.log('Special offers loaded (Admin).');
-            }
-
-            function saveSpecialOffers() {
-                localStorage.setItem(SPECIAL_OFFERS_KEY, JSON.stringify(specialOffers));
-                showAdminMessageModal('儲存成功', '優惠數據已儲存！', 'success');
-                console.log('Special offers saved (Admin).');
-            }
-
-            function clearOfferForm() {
-                editOfferIdInput.value = '';
-                offerNameInput.value = '';
-                offerDescriptionInput.value = '';
-                offerOriginalPriceInput.value = '';
-                offerSpecialPriceInput.value = '';
-                offerImageInput.value = '';
-            }
-
-            // --- Event Listeners ---
             // Coffee Bean Event Listeners
             loadCoffeeBtn.addEventListener('click', loadCoffeeBeans);
             saveCoffeeBtn.addEventListener('click', saveCoffeeBeans);
@@ -611,14 +716,16 @@
                     return;
                 }
 
-                const newOffer = {
-                    id: generateId(), // Simple ID generation
+                // Use the manager's merge function for consistency, even for new offers
+                const newOffer = window.OfferDataManager.mergeWithDefaultSchema([{ 
+                    id: generateId(), 
                     name: offerNameInput.value,
                     description: offerDescriptionInput.value,
                     originalPrice: parseFloat(offerOriginalPriceInput.value) || 0,
                     specialPrice: parseFloat(offerSpecialPriceInput.value) || 0,
                     image: offerImageInput.value || 'https://placehold.co/400x250/cccccc/333333?text=新優惠'
-                };
+                }], window.OfferDataManager.defaultOfferTemplate)[0]; // Ensure it merges with the template
+
                 specialOffers.push(newOffer);
                 saveSpecialOffers();
                 renderSpecialOffersAdmin();
@@ -641,14 +748,17 @@
                     return;
                 }
 
-                specialOffers[offerIndex] = {
+                // Create a new offer object with updated values and merge with the default schema
+                const updatedOffer = window.OfferDataManager.mergeWithDefaultSchema([{
                     ...specialOffers[offerIndex], // Keep existing properties
                     name: offerNameInput.value,
                     description: offerDescriptionInput.value,
                     originalPrice: parseFloat(offerOriginalPriceInput.value) || 0,
                     specialPrice: parseFloat(offerSpecialPriceInput.value) || 0,
                     image: offerImageInput.value || specialOffers[offerIndex].image
-                };
+                }], window.OfferDataManager.defaultOfferTemplate)[0]; // Ensure it merges with the template
+                
+                specialOffers[offerIndex] = updatedOffer; // Assign the merged and updated object back
                 saveSpecialOffers();
                 renderSpecialOffersAdmin();
                 clearOfferForm();
@@ -658,9 +768,11 @@
             clearOfferFormBtn.addEventListener('click', clearOfferForm);
 
             // Initial load for admin panel when opened
-            loadCoffeeBeans();
-            loadSpecialOffers();
+            loadCoffeeBeans(); // Coffee beans remain separate
+            loadSpecialOffers(); // Now uses OfferDataManager
         });
+
+        })(); // End IIFE
     </script>
 </body>
 </html>
