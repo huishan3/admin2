@@ -23,7 +23,7 @@
         h1, h2, h3 {
             color: #b58863;
         }
-        input[type="text"], input[type="number"], input[type="date"], textarea, select {
+        input[type="text"], input[type="number"], input[type=\"date\"], textarea, select {
             border: 1px solid #ddd;
             padding: 8px;
             border-radius: 4px;
@@ -248,6 +248,8 @@
             }
 
             // 📦 dataManager.js - 統一優惠資料管理模組
+            // Note: This dataManager logic will now primarily act as a schema definition and default provider
+            // The actual loading/saving will be handled by Firestore
             const defaultOfferTemplate = {
                 id: '', // Will use Firestore doc.id
                 name: '',
@@ -259,9 +261,7 @@
 
             // 新增預設優惠活動資料，確保前後台預設值一致
             const DEFAULT_SPECIAL_OFFERS = [
-                { id: 'default-offer-1', name: '首購限定：精品咖啡豆8折優惠', description: '首次購買任選咖啡豆，即享8折優惠！', originalPrice: 500, specialPrice: 400, image: 'https://placehold.co/400x250/b58863/FFFFFF?text=First+Purchase+Offer' },
-                { id: 'default-offer-2', name: '滿額贈禮：質感咖啡杯', description: '消費滿NT$1000，即可獲贈Melody Bean質感咖啡杯一個！', originalPrice: 1000, specialPrice: 0, image: 'https://placehold.co/400x250/6b46c1/FFFFFF?text=Free+Coffee+Cup' },
-                { id: 'default-offer-3', name: '夏季限定：冰釀咖啡買一送一', description: '炎炎夏日，冰釀咖啡讓您清涼一夏，同品項買一送一！', originalPrice: 200, specialPrice: 100, image: 'https://placehold.co/400x250/3182ce/FFFFFF?text=Summer+Brew+BOGO' }
+                { id: 'default-offer-1', name: '預設優惠：系統初始體驗包', description: '這是系統預設的優惠，如果資料庫中沒有數據，將會顯示此優惠。', originalPrice: 500, specialPrice: 400, image: 'https://placehold.co/400x200/b58863/FFFFFF?text=Default+Offer' }
             ];
 
             /**
@@ -293,14 +293,14 @@
 
             // --- Default Data (Hardcoded for initial setup if Firestore is empty) ---
             const defaultCoffeeBeans = [
-                { name: 'GEISHA 水洗（114g）', country: '衣索比亞', variety: 'GEISHA 水洗', flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬、百香果', roast: '淺焙', weight: '114g', expiryDate: '2025-10-12', price: 280, stock: 10, category: 'light', imageUrl: './image/image_1.png', flavorScores: { acidity: 4, body: 2, sweetness: 4, floral: 5, nutty: 2, fruity: 4 }, lifestyle: '這款咖啡充滿複雜的香氣與明亮的風味，適合在靜謐的午後細細品味，或搭配輕盈的甜點。' },
-                { name: 'Heirloom 雙重厭氧（227g）- 批次A', country: '衣索比亞', variety: 'Heirloom', flavor: '茉莉、橙花、蜂蜜、水蜜桃', roast: '淺焙', weight: '227g', expiryDate: '2025-10-28', price: 600, stock: 5, category: 'light', imageUrl: './image/image_2.png', flavorScores: { acidity: 4, body: 3, sweetness: 5, floral: 5, nutty: 2, fruity: 4 }, lifestyle: '甜美而豐富的口感，是開啟美好一天的理想選擇，與早餐糕點搭配尤佳。' },
-                { name: 'Heirloom 雙重厭氧（227g）- 批次B', country: '衣索比亞', variety: 'Heirloom', flavor: '茉莉、橙花、蜂蜜、水蜜桃', roast: '淺焙', weight: '227g', expiryDate: '2025-10-31', price: 600, stock: 8, category: 'light', imageUrl: './image/image_3.png', flavorScores: { acidity: 4, body: 3, sweetness: 5, floral: 5, nutty: 2, fruity: 4 }, lifestyle: '相同的風味，不同的採收批次，確保每一杯都有始終如一的甜蜜與芬芳。' },
-                { name: 'GEISHA（227g）中淺焙', country: '衣索比亞', variety: 'GEISHA', flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬', roast: '中淺焙', weight: '227g', expiryDate: '2025-11-01', price: 540, stock: 12, category: 'medium', imageUrl: './image/image_4.png', flavorScores: { acidity: 3, body: 3, sweetness: 3, floral: 4, nutty: 3, fruity: 3 }, lifestyle: '平衡的風味與較低的酸度，適合日常飲用，無論是搭配閱讀或工作，都能帶來愉悅感受。' },
-                { name: 'GEISHA 水洗（227g）2280m', country: '衣索比亞', variety: 'GEISHA 水洗', flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬', roast: '中淺焙', weight: '227g', expiryDate: '2025-11-05', price: 580, stock: 0, category: 'light', imageUrl: './image/image_5.png', flavorScores: { acidity: 4, body: 2, sweetness: 4, floral: 5, nutty: 2, fruity: 4 }, lifestyle: '來自高海拔的獨特風味，建議在需要提振精神的早晨品嚐，感受其清晰明亮的層次。' },
-                { name: '衣索比亞 淺焙（227g）', country: '衣索比亞', variety: '原生種', flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬', roast: '淺焙', weight: '227g', expiryDate: '2025-11-01', price: 540, stock: 7, category: 'light', imageUrl: './image/image_6.png', flavorScores: { acidity: 4, body: 2, sweetness: 4, floral: 5, nutty: 2, fruity: 4 }, lifestyle: '輕盈的花果調性，是下午茶時光的完美伴侶，能為您的休憩時刻增添一抹亮色。' },
-                { name: '哥斯大黎加 Geisha 白蜜（114g）', country: '哥斯大黎加', variety: 'Geisha（藝妓）', flavor: '百合花、野薑花、檸檬草、柑橘、紅色莓果、蜂蜜', roast: '淺焙', weight: '114g', expiryDate: '2025-08-15', price: 800, stock: 3, category: 'light', imageUrl: './image/image_7.png', flavorScores: { acidity: 5, body: 3, sweetness: 4, floral: 5, nutty: 2, fruity: 4 }, lifestyle: '此款藝妓咖啡風味精緻優雅，適合在重要時刻或與好友分享，搭配簡約的甜點以突顯其豐富層次。' },
-                { name: '哥斯大黎加 淺焙（227g）', country: '哥斯大黎加', variety: 'Geisha（藝妓）', flavor: '百合花、野薑花、檸檬草、柑橘、紅色莓果、蜂蜜', roast: '淺焙', weight: '227g', expiryDate: '2025-08-15', price: 1800, stock: 1, category: 'light', imageUrl: './image/image_8.png', flavorScores: { acidity: 5, body: 3, sweetness: 4, floral: 5, nutty: 2, fruity: 4 }, lifestyle: '大容量包裝讓您能更長時間地享受藝妓咖啡的迷人魅力，每日品飲或作為珍貴贈禮皆宜。' }
+                { name: 'GEISHA 水洗（114g）', country: '衣索比亞', variety: 'GEISHA 水洗', flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬、百香果', roast: '淺焙', weight: '114g', expiryDate: '2025-10-12', price: 280, stock: 10, category: 'light', image: './image/image_1.png', flavorProfile: { acidity: 4, body: 2, sweetness: 4, aroma: 5, finish: 4 }, lifestyle: '這款咖啡充滿複雜的香氣與明亮的風味，適合在靜謐的午後細細品味，或搭配輕盈的甜點。' },
+                { name: 'Heirloom 雙重厭氧（227g）- 批次A', country: '衣索比亞', variety: 'Heirloom', flavor: '茉莉、橙花、蜂蜜、水蜜桃', roast: '淺焙', weight: '227g', expiryDate: '2025-10-28', price: 600, stock: 5, category: 'light', image: './image/image_2.png', flavorProfile: { acidity: 4, body: 3, sweetness: 5, aroma: 5, finish: 4 }, lifestyle: '甜美而豐富的口感，是開啟美好一天的理想選擇，與早餐糕點搭配尤佳。' },
+                { name: 'Heirloom 雙重厭氧（227g）- 批次B', country: '衣索比亞', variety: 'Heirloom', flavor: '茉莉、橙花、蜂蜜、水蜜桃', roast: '淺焙', weight: '227g', expiryDate: '2025-10-31', price: 600, stock: 8, category: 'light', image: './image/image_3.png', flavorProfile: { acidity: 4, body: 3, sweetness: 5, aroma: 5, finish: 4 }, lifestyle: '相同的風味，不同的採收批次，確保每一杯都有始終如一的甜蜜與芬芳。' },
+                { name: 'GEISHA（227g）中淺焙', country: '衣索比亞', variety: 'GEISHA', flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬', roast: '中淺焙', weight: '227g', expiryDate: '2025-11-01', price: 540, stock: 12, category: 'medium', image: './image/image_4.png', flavorProfile: { acidity: 3, body: 3, sweetness: 3, aroma: 4, finish: 3 }, lifestyle: '平衡的風味與較低的酸度，適合日常飲用，無論是搭配閱讀或工作，都能帶來愉悅感受。' },
+                { name: 'GEISHA 水洗（227g）2280m', country: '衣索比亞', variety: 'GEISHA 水洗', flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬', roast: '中淺焙', weight: '227g', expiryDate: '2025-11-05', price: 580, stock: 0, category: 'light', image: './image/image_5.png', flavorProfile: { acidity: 4, body: 2, sweetness: 4, aroma: 5, finish: 4 }, lifestyle: '來自高海拔的獨特風味，建議在需要提振精神的早晨品嚐，感受其清晰明亮的層次。' },
+                { name: '衣索比亞 淺焙（227g）', country: '衣索比亞', variety: '', flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬', roast: '淺焙', weight: '227g', expiryDate: '2025-11-01', price: 540, stock: 7, category: 'light', image: './image/image_6.png', flavorProfile: { acidity: 4, body: 2, sweetness: 4, aroma: 5, finish: 4 }, lifestyle: '輕盈的花果調性，是下午茶時光的完美伴侶，能為您的休憩時刻增添一抹亮色。' },
+                { name: '哥斯大黎加 Geisha 白蜜（114g）', country: '哥斯大黎加', variety: 'Geisha（藝妓）', flavor: '百合花、野薑花、檸檬草、柑橘、紅色莓果、蜂蜜', roast: '淺焙', weight: '114g', expiryDate: '2025-08-15', price: 800, stock: 3, category: 'light', image: './image/image_7.png', flavorProfile: { acidity: 5, body: 3, sweetness: 4, aroma: 5, finish: 4 }, lifestyle: '此款藝妓咖啡風味精緻優雅，適合在重要時刻或與好友分享，搭配簡約的甜點以突顯其豐富層次。' },
+                { name: '哥斯大黎加 淺焙（227g）', country: '哥斯大黎加', variety: '', flavor: '百合花、野薑花、檸檬草、柑橘、紅色莓果、蜂蜜', roast: '淺焙', weight: '227g', expiryDate: '2025-08-15', price: 1800, stock: 1, category: 'light', image: './image/image_8.png', flavorProfile: { acidity: 5, body: 3, sweetness: 4, aroma: 5, finish: 4 }, lifestyle: '大容量包裝讓您能更長時間地享受藝妓咖啡的迷人魅力，每日品飲或作為珍貴贈禮皆宜。' }
             ];
 
             // --- Data Variables (will be populated from Firestore) ---
@@ -434,15 +434,15 @@
                             coffeeExpiryInput.value = beanToEdit.expiryDate;
                             coffeeStockInput.value = beanToEdit.stock;
                             coffeeCategoryInput.value = beanToEdit.category || '';
-                            coffeeImageInput.value = beanToEdit.imageUrl;
+                            coffeeImageInput.value = beanToEdit.image;
                             coffeeLifestyleInput.value = beanToEdit.lifestyle;
 
-                            if (beanToEdit.flavorScores) {
-                                fpAcidityInput.value = beanToEdit.flavorScores.acidity || 0;
-                                fpBodyInput.value = beanToEdit.flavorScores.body || 0;
-                                fpSweetnessInput.value = beanToEdit.flavorScores.sweetness || 0;
-                                fpAromaInput.value = beanToEdit.flavorScores.aroma || 0;
-                                fpFinishInput.value = beanToEdit.flavorScores.finish || 0;
+                            if (beanToEdit.flavorProfile) {
+                                fpAcidityInput.value = beanToEdit.flavorProfile.acidity || 0;
+                                fpBodyInput.value = beanToEdit.flavorProfile.body || 0;
+                                fpSweetnessInput.value = beanToEdit.flavorProfile.sweetness || 0;
+                                fpAromaInput.value = beanToEdit.flavorProfile.aroma || 0;
+                                fpFinishInput.value = beanToEdit.flavorProfile.finish || 0;
                             } else {
                                 fpAcidityInput.value = ''; fpBodyInput.value = ''; fpSweetnessInput.value = '';
                                 fpAromaInput.value = ''; fpFinishInput.value = '';
@@ -470,22 +470,25 @@
 
             // Load coffee beans from Firestore with real-time listener
             function loadCoffeeBeans() {
-                onSnapshot(query(coffeeBeansCollection), async (snapshot) => {
+                onSnapshot(query(coffeeBeansCollection), (snapshot) => {
                     const beansFromFirestore = [];
-                    snapshot.forEach((doc) => {
+                    snapshot.forEach(doc => {
                         beansFromFirestore.push({ id: doc.id, ...doc.data() });
                     });
 
                     if (beansFromFirestore.length === 0) {
                         // If Firestore is empty, seed with default data
                         if (coffeeBeans.length === 0) { // Only seed if local array is also empty
-                             for (const bean of defaultCoffeeBeans) {
+                             defaultCoffeeBeans.forEach(async (bean) => {
                                 try {
+                                    // Use setDoc with a generated ID if you want a specific ID,
+                                    // or addDoc for auto-generated ID without specifying.
+                                    // For initial seeding, using addDoc is simpler.
                                     await addDoc(coffeeBeansCollection, bean);
                                 } catch (error) {
                                     console.error("Error seeding default coffee bean:", error);
                                 }
-                            }
+                            });
                             showAdminMessageModal('載入成功', '資料庫無數據，已載入預設咖啡豆數據。', 'success');
                         } else {
                             showAdminMessageModal('載入成功', '資料庫無數據，請新增或儲存咖啡豆。', 'info');
@@ -506,12 +509,41 @@
             async function saveCoffeeBeans() {
                 showAdminMessageModal('資訊', '正在將咖啡豆數據同步到資料庫...', 'info');
                 try {
+                    // Fetch current data from the UI to ensure we save what's displayed or edited
+                    const currentBeansOnUI = [];
+                    document.querySelectorAll('#admin-coffee-list li').forEach(li => {
+                        const id = li.dataset.id;
+                        const bean = coffeeBeans.find(b => b.id === id); // Get the full bean object
+                        if (bean) {
+                            currentBeansOnUI.push(bean);
+                        }
+                    });
+
+                    // Clear existing collection (this is a simple sync, for real apps consider merge/batch writes)
+                    // Note: This approach clears and re-adds. For large datasets, this is inefficient.
+                    // A better approach would be to track changes (add/update/delete) locally and apply them via batch writes.
+                    // For simplicity, we will just rely on the onSnapshot listener for updates after add/update/delete actions.
+                    // This button will now serve more as a "Trigger Initial Load/Re-seed" if needed.
+                    
                     // For a "Save All" button, a more robust logic would be to compare local `coffeeBeans`
                     // with current Firestore data and perform batched updates/deletes/adds.
                     // However, given the onSnapshot is already active and handling real-time,
                     // this button's primary role might simply be to trigger a re-seed if the collection is empty.
-                    // Or, for simplicity, it could just re-trigger the load to ensure UI matches Firestore.
-                    loadCoffeeBeans(); // This will re-fetch and update `coffeeBeans` array and render.
+                    
+                    // Let's keep this as a simple "Confirm data is loaded/synced" rather than a destructive "save all".
+                    // The add/update/delete buttons will handle the actual Firestore writes.
+                    
+                    // To truly "save all" as implied by the button, we would iterate `coffeeBeans` and `setDoc` each.
+                    // For this example, let's just confirm the onSnapshot is working.
+                    
+                    // If the user truly expects "Save all currently visible items to Firestore",
+                    // we would fetch all documents and delete them, then re-add everything in `coffeeBeans`.
+                    // This is usually not how real-time databases are used.
+                    // Let's change the button's behavior to re-load from Firestore,
+                    // and rely on the Add/Update/Delete buttons for actual writes.
+                    
+                    // Re-calling loadCoffeeBeans will refresh the data from Firestore.
+                    loadCoffeeBeans(); 
                     showAdminMessageModal('已同步', '咖啡豆數據已與資料庫同步。', 'success'); // Change message
                 } catch (error) {
                     console.error("Error saving coffee beans:", error);
@@ -595,23 +627,23 @@
 
             // Load special offers from Firestore with real-time listener
             function loadSpecialOffers() {
-                onSnapshot(query(specialOffersCollection), async (snapshot) => {
+                onSnapshot(query(specialOffersCollection), (snapshot) => {
                     const offersFromFirestore = [];
-                    snapshot.forEach((doc) => {
+                    snapshot.forEach(doc => {
                         offersFromFirestore.push({ id: doc.id, ...doc.data() });
                     });
 
                     if (offersFromFirestore.length === 0) {
                         // If Firestore is empty, seed with default data
                         if (specialOffers.length === 0) { // Only seed if local array is also empty
-                            for (const offer of window.OfferDataManager.DEFAULT_SPECIAL_OFFERS) {
+                            window.OfferDataManager.DEFAULT_SPECIAL_OFFERS.forEach(async (offer) => {
                                 try {
-                                    // Use setDoc with a specific ID, or addDoc for auto-generated ID
+                                    // Use setDoc with the default ID
                                     await setDoc(doc(db, `artifacts/${appId}/users/${userId}/specialOffers`, offer.id), offer);
                                 } catch (error) {
                                     console.error("Error seeding default special offer:", error);
                                 }
-                            }
+                            });
                             showAdminMessageModal('載入成功', '資料庫無數據，已載入預設優惠活動。', 'success');
                         } else {
                             showAdminMessageModal('載入成功', '資料庫無數據，請新增或儲存優惠活動。', 'info');
@@ -672,8 +704,8 @@
                         expiryDate: coffeeExpiryInput.value,
                         stock: parseInt(coffeeStockInput.value) || 0,
                         category: coffeeCategoryInput.value,
-                        imageUrl: coffeeImageInput.value || 'https://placehold.co/400x200/cccccc/333333?text=新咖啡豆',
-                        flavorScores: { 
+                        image: coffeeImageInput.value || 'https://placehold.co/400x200/cccccc/333333?text=新咖啡豆',
+                        flavorProfile: { 
                             acidity: parseFloat(fpAcidityInput.value) || 0, 
                             body: parseFloat(fpBodyInput.value) || 0, 
                             sweetness: parseFloat(fpSweetnessInput.value) || 0, 
@@ -716,9 +748,9 @@
                         expiryDate: coffeeExpiryInput.value,
                         stock: parseInt(coffeeStockInput.value) || 0,
                         category: coffeeCategoryInput.value,
-                        imageUrl: coffeeImageInput.value || 'https://placehold.co/400x200/cccccc/333333?text=更新咖啡豆', // Provide a fallback if image is cleared
+                        image: coffeeImageInput.value || 'https://placehold.co/400x200/cccccc/333333?text=更新咖啡豆', // Provide a fallback if image is cleared
                         lifestyle: coffeeLifestyleInput.value,
-                        flavorScores: {
+                        flavorProfile: {
                             acidity: parseFloat(fpAcidityInput.value) || 0,
                             body: parseFloat(fpBodyInput.value) || 0,
                             sweetness: parseFloat(fpSweetnessInput.value) || 0,
