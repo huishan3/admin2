@@ -3,849 +3,804 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Melody Bean | 後端管理介面</title>
+    <title>Melody Bean | 後台管理</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --color-bg: #fdfaf5; /* 溫暖米白 */
+            --color-surface: #ffffff;
+            --color-primary: #b58863; /* 柔和木質棕 */
+            --color-secondary: #3f2e2e; /* 深咖啡文字 */
+            --color-accent: #6b8e23; /* 橄欖綠 */
+        }
         body {
             font-family: 'Noto Sans TC', sans-serif;
-            background-color: #f8f8f8;
-            color: #333;
-            padding: 20px;
+            background-color: var(--color-bg);
+            color: var(--color-secondary);
+            background-image: url('https://www.transparenttextures.com/patterns/wood-pattern.png');
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            background-color: var(--color-surface);
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         }
-        h1, h2, h3 {
-            color: #b58863;
+        h1, h2 {
+            font-family: 'Playfair Display', serif;
+            color: var(--color-primary);
         }
-        input[type="text"], input[type="number"], input[type=\"date\"], textarea, select {
-            border: 1px solid #ddd;
-            padding: 8px;
-            border-radius: 4px;
-            width: 100%;
-            box-sizing: border-box; /* Ensures padding doesn't increase total width */
-        }
-        button {
-            padding: 10px 15px;
-            border-radius: 5px;
+        .btn-primary {
+            background-color: var(--color-primary);
             color: white;
-            cursor: pointer;
-            transition: background-color 0.2s;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        .btn-blue { background-color: #4299e1; }
-        .btn-blue:hover { background-color: #3182ce; }
-        .btn-green { background-color: #48bb78; }
-        .btn-green:hover { background-color: #38a169; }
-        .btn-purple { background-color: #805ad5; }
-        .btn-purple:hover { background-color: #6b46c1; }
-        .btn-yellow { background-color: #ecc94b; }
-        .btn-yellow:hover { background-color: #d69e2e; }
-        .btn-red { background-color: #ef4444; }
-        .btn-red:hover { background-color: #dc2626; }
-        .card {
-            border: 1px solid #eee;
-            padding: 15px;
-            border-radius: 6px;
-            background-color: #fdfdfd;
+        .btn-primary:hover {
+            background-color: #a07654;
+            transform: translateY(-1px);
         }
-        .item-list li {
-            background-color: #fdfaf5;
-            padding: 10px;
-            margin-bottom: 5px;
-            border-radius: 5px;
+        .btn-secondary {
+            background-color: #e0e0e0;
+            color: var(--color-secondary);
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .btn-secondary:hover {
+            background-color: #d0d0d0;
+            transform: translateY(-1px);
+        }
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .btn-danger:hover {
+            background-color: #dc2626;
+            transform: translateY(-1px);
+        }
+        input[type="text"], input[type="number"], input[type="url"], input[type="date"], textarea, select {
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            width: 100%;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        input[type="text"]:focus, input[type="number"]:focus, input[type="url"]:focus, input[type="date"]:focus, textarea:focus, select:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(181, 136, 99, 0.2);
+            outline: none;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+        th, td {
+            border: 1px solid #e5e7eb;
+            padding: 0.75rem;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+            color: var(--color-secondary);
+        }
+        tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+        .modal {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid #f0f0f0;
-        }
-        /* Custom styles for admin message modal */
-        .admin-modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1000; /* Sit on top */
+            position: fixed;
+            z-index: 1000;
             left: 0;
             top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
             justify-content: center;
             align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
+            pointer-events: none;
         }
-        .admin-modal-content {
-            background-color: #fefefe;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            max-width: 400px;
+        .modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background-color: var(--color-surface);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            max-width: 450px;
             width: 90%;
             text-align: center;
             position: relative;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
         }
-        .admin-modal-close-button {
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
+        .modal.active .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+        .modal-close-button {
+            color: #888;
+            font-size: 24px;
             position: absolute;
-            top: 10px;
-            right: 15px;
+            top: 15px;
+            right: 18px;
+            cursor: pointer;
+            transition: color 0.2s;
         }
-        .admin-modal-close-button:hover,
-        .admin-modal-close-button:focus {
-            color: black;
+        .modal-close-button:hover,
+        .modal-close-button:focus {
+            color: var(--color-secondary);
         }
-        .admin-modal-success { color: #48bb78; } /* Green */
-        .admin-modal-error { color: #ef4444; } /* Red */
+        .icon-success { color: var(--color-accent); }
+        .icon-error { color: #ef4444; }
+        .icon-info { color: var(--color-primary); }
+        .modal-message-content {
+            max-height: 40vh;
+            overflow-y: auto;
+            padding-right: 15px;
+            margin-bottom: 1rem;
+            text-align: left;
+            padding-left: 5px;
+        }
+        .stock-indicator {
+            font-weight: bold;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.85em;
+        }
+        .stock-in-stock {
+            background-color: #d1fae5; /* 綠色-100 */
+            color: #065f46; /* 綠色-800 */
+        }
+        .stock-low-stock {
+            background-color: #fef3c7; /* 黃色-100 */
+            color: #92400e; /* 黃色-800 */
+        }
+        .stock-out-of-stock {
+            background-color: #fee2e2; /* 紅色-100 */
+            color: #991b1b; /* 紅色-800 */
+        }
     </style>
 </head>
-<body>
-    <div class="container mx-auto p-8">
-        <h1 class="text-4xl font-bold mb-8">Melody Bean 後端管理介面</h1>
+<body class="flex flex-col min-h-screen">
+    <header class="bg-primary text-white p-4 shadow-md">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="text-3xl font-serif">Melody Bean | 後台管理</h1>
+            <a href="展示.html" class="px-4 py-2 rounded-full bg-white text-primary hover:bg-gray-100 transition-colors">
+                <i class="fas fa-home mr-2"></i> 前台首頁
+            </a>
+        </div>
+    </header>
 
-        <section class="mb-12">
-            <h2 class="text-3xl font-semibold mb-6">咖啡豆管理</h2>
-            <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-                <h3 class="text-xl font-semibold mb-4">現有咖啡豆列表</h3>
-                <ul id="admin-coffee-list" class="item-list list-none pl-0 space-y-2 mb-4">
-                    <!-- Coffee beans will be listed here -->
-                </ul>
-                <div class="flex gap-2">
-                    <!-- 載入和儲存按鈕現在將與 Firestore 互動 -->
-                    <button id="load-coffee-data" class="btn-blue">從資料庫載入咖啡豆</button>
-                    <button id="save-coffee-data" class="btn-green">儲存咖啡豆到資料庫</button>
+    <main class="flex-grow container">
+        <h2 class="text-3xl font-serif text-center mb-6">咖啡豆品項管理</h2>
+
+        <!-- Product Form -->
+        <form id="product-form" class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 border border-gray-200 rounded-lg shadow-sm mb-8">
+            <input type="hidden" id="product-id">
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">名稱 <span class="text-red-500">*</span></label>
+                <input type="text" id="name" required>
+            </div>
+            <div>
+                <label for="country" class="block text-sm font-medium text-gray-700 mb-1">國家 <span class="text-red-500">*</span></label>
+                <input type="text" id="country" required>
+            </div>
+            <div>
+                <label for="variety" class="block text-sm font-medium text-gray-700 mb-1">品種</label>
+                <input type="text" id="variety">
+            </div>
+            <div>
+                <label for="processing" class="block text-sm font-medium text-gray-700 mb-1">處理法</label>
+                <input type="text" id="processing">
+            </div>
+            <div>
+                <label for="altitude" class="block text-sm font-medium text-gray-700 mb-1">海拔</label>
+                <input type="text" id="altitude">
+            </div>
+            <div>
+                <label for="weight" class="block text-sm font-medium text-gray-700 mb-1">重量 <span class="text-red-500">*</span></label>
+                <input type="text" id="weight" required placeholder="例如: 200g">
+            </div>
+            <div>
+                <label for="roast" class="block text-sm font-medium text-gray-700 mb-1">烘焙度 <span class="text-red-500">*</span></label>
+                <input type="text" id="roast" required placeholder="例如: 淺焙, 中深烘焙">
+            </div>
+            <div>
+                <label for="expiry" class="block text-sm font-medium text-gray-700 mb-1">期限 <span class="text-red-500">*</span></label>
+                <input type="date" id="expiry" required>
+            </div>
+            <div>
+                <label for="price" class="block text-sm font-medium text-gray-700 mb-1">售價 (NT$) <span class="text-red-500">*</span></label>
+                <input type="number" id="price" min="0" required>
+            </div>
+            <div>
+                <label for="stock" class="block text-sm font-medium text-gray-700 mb-1">庫存數量 <span class="text-red-500">*</span></label>
+                <input type="number" id="stock" min="0" required>
+            </div>
+            <div class="md:col-span-2">
+                <label for="flavor" class="block text-sm font-medium text-gray-700 mb-1">風味描述 <span class="text-red-500">*</span></label>
+                <textarea id="flavor" rows="2" required placeholder="例如: 黑巧克力、焦糖、堅果"></textarea>
+            </div>
+            <div class="md:col-span-2">
+                <label for="image" class="block text-sm font-medium text-gray-700 mb-1">圖片網址</label>
+                <input type="url" id="image" placeholder="例如: https://example.com/coffee.jpg">
+            </div>
+            <div>
+                <label for="farm_or_station" class="block text-sm font-medium text-gray-700 mb-1">處理場/莊園</label>
+                <input type="text" id="farm_or_station">
+            </div>
+            <div>
+                <label for="lifestyle" class="block text-sm font-medium text-gray-700 mb-1">生活提案</label>
+                <textarea id="lifestyle" rows="2" placeholder="例如: 早晨提神、搭配甜點"></textarea>
+            </div>
+            <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-5 gap-4">
+                <label class="block text-sm font-medium text-gray-700 sm:col-span-5 mb-1">風味雷達圖 (0-100)</label>
+                <div>
+                    <label for="profile-bitter" class="block text-xs font-medium text-gray-600">苦味</label>
+                    <input type="number" id="profile-bitter" min="0" max="100" value="50">
+                </div>
+                <div>
+                    <label for="profile-acidity" class="block text-xs font-medium text-gray-600">酸度</label>
+                    <input type="number" id="profile-acidity" min="0" max="100" value="50">
+                </div>
+                <div>
+                    <label for="profile-body" class="block text-xs font-medium text-gray-600">醇厚度</label>
+                    <input type="number" id="profile-body" min="0" max="100" value="50">
+                </div>
+                <div>
+                    <label for="profile-floral" class="block text-xs font-medium text-gray-600">花果香</label>
+                    <input type="number" id="profile-floral" min="0" max="100" value="50">
+                </div>
+                <div>
+                    <label for="profile-nutty" class="block text-xs font-medium text-gray-600">堅果/巧克力</label>
+                    <input type="number" id="profile-nutty" min="0" max="100" value="50">
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h3 class="text-xl font-semibold mb-4">新增 / 編輯咖啡豆</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <input type="hidden" id="edit-coffee-id">
-                    <input type="text" id="coffee-name" placeholder="名稱 (必填)" class="p-2 border rounded-md" required>
-                    <input type="text" id="coffee-country" placeholder="國家" class="p-2 border rounded-md">
-                    <input type="text" id="coffee-variety" placeholder="品種" class="p-2 border rounded-md">
-                    <input type="text" id="coffee-flavor" placeholder="風味描述" class="p-2 border rounded-md">
-                    <select id="coffee-roast" class="p-2 border rounded-md">
-                        <option value="" disabled selected>烘焙度</option>
-                        <option value="淺焙">淺焙</option>
-                        <option value="中淺焙">中淺焙</option>
-                        <option value="中焙">中焙</option>
-                        <option value="中深焙">中深焙</option>
-                        <option value="深焙">深焙</option>
-                    </select>
-                    <input type="text" id="coffee-weight" placeholder="重量 (例如: 114g, 227g)" class="p-2 border rounded-md">
-                    <input type="number" id="coffee-price" placeholder="售價 (必填)" class="p-2 border rounded-md" required>
-                    <input type="date" id="coffee-expiry" placeholder="期限 (YYYY-MM-DD)" class="p-2 border rounded-md">
-                    <input type="number" id="coffee-stock" placeholder="庫存 (數量) (必填)" min="0" class="p-2 border rounded-md" required> <!-- NEW STOCK FIELD -->
-                    <select id="coffee-category" class="p-2 border rounded-md">
-                        <option value="" disabled selected>分類</option>
-                        <option value="light">淺焙類</option>
-                        <option value="medium">中焙類</option>
-                        <option value="dark">深焙類</option>
-                    </select>
-                    <input type="text" id="coffee-image" placeholder="圖片URL (例如: ./image/image_1.png 或 placehold.co)" class="p-2 border rounded-md col-span-2">
-                    <textarea id="coffee-lifestyle" placeholder="生活提案 (例如: 適合在靜謐的午後細細品味)" class="p-2 border rounded-md col-span-2"></textarea>
-                    
-                    <!-- Flavor Profile Inputs (optional, could be more complex UI) -->
-                    <h4 class="col-span-2 text-md font-semibold mt-2">風味圖譜評分 (1-5)</h4>
-                    <input type="number" id="fp-acidity" placeholder="酸度" min="0" max="5" class="p-2 border rounded-md">
-                    <input type="number" id="fp-body" placeholder="醇厚度" min="0" max="5" class="p-2 border rounded-md">
-                    <input type="number" id="fp-sweetness" placeholder="甜度" min="0" max="5" class="p-2 border rounded-md">
-                    <input type="number" id="fp-aroma" placeholder="香氣" min="0" max="5" class="p-2 border rounded-md">
-                    <input type="number" id="fp-finish" placeholder="餘韻" min="0" max="5" class="p-2 border rounded-md">
-                </div>
-                <div class="flex gap-2">
-                    <button id="add-coffee" class="btn-purple">新增咖啡豆</button>
-                    <button id="update-coffee" class="btn-yellow">更新選定咖啡豆</button>
-                    <button id="clear-coffee-form" class="btn-blue">清除表單</button>
-                </div>
+            <div class="md:col-span-2 flex justify-end space-x-4 mt-4">
+                <button type="submit" id="save-product-btn" class="px-6 py-2 rounded-md btn-primary">
+                    <i class="fas fa-save mr-2"></i> 新增/更新品項
+                </button>
+                <button type="button" id="clear-form-btn" class="px-6 py-2 rounded-md btn-secondary">
+                    <i class="fas fa-eraser mr-2"></i> 清除表單
+                </button>
             </div>
-        </section>
+        </form>
 
-        <section>
-            <h2 class="text-3xl font-semibold mb-6">優惠活動管理</h2>
-            <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-                <h3 class="text-xl font-semibold mb-4">現有優惠活動列表</h3>
-                <ul id="admin-offer-list" class="item-list list-none pl-0 space-y-2 mb-4">
-                    <!-- Offers will be listed here -->
-                </ul>
-                <div class="flex gap-2">
-                    <!-- 載入和儲存按鈕現在將與 Firestore 互動 -->
-                    <button id="load-offer-data" class="btn-blue">從資料庫載入優惠</button>
-                    <button id="save-offer-data" class="btn-green">儲存優惠到資料庫</button>
-                </div>
+        <!-- Product List Table -->
+        <h3 class="text-2xl font-serif mb-4">現有咖啡豆品項</h3>
+        <div class="overflow-x-auto rounded-lg shadow-md">
+            <table class="min-w-full bg-white">
+                <thead>
+                    <tr>
+                        <th>名稱</th>
+                        <th>國家</th>
+                        <th>品種</th>
+                        <th>處理法</th>
+                        <th>海拔</th>
+                        <th>重量</th>
+                        <th>烘焙度</th>
+                        <th>期限</th>
+                        <th>售價</th>
+                        <th>庫存</th>
+                        <th>風味</th>
+                        <th>圖片</th>
+                        <th>處理場/莊園</th>
+                        <th>生活提案</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="products-table-body">
+                    <!-- Product rows will be loaded here by JavaScript -->
+                    <tr><td colspan="15" class="text-center py-4 text-gray-500">載入咖啡豆品項中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <footer class="bg-secondary text-white py-4 mt-8">
+        <div class="max-w-6xl mx-auto text-center text-gray-300">
+            <p>&copy; 2024 Melody Bean. 後台管理.</p>
+        </div>
+    </footer>
+
+    <!-- Custom Modal for messages and confirmations -->
+    <div id="adminMessageModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close-button" onclick="closeAdminMessageModal()">&times;</span>
+            <div id="modalIcon" class="text-5xl mb-4"></div>
+            <h3 id="modalTitle" class="text-2xl font-serif mb-4"></h3>
+            <p id="modalMessage" class="text-gray-700 mb-4 modal-message-content"></p>
+            <div id="modalButtons" class="flex justify-center space-x-4">
+                <button onclick="closeAdminMessageModal()" class="btn-primary px-6 py-2 rounded-full">確認</button>
             </div>
-
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h3 class="text-xl font-semibold mb-4">新增 / 編輯優惠</h3>
-                <input type="hidden" id="edit-offer-id">
-                <input type="text" id="offer-name" placeholder="名稱 (必填)" class="p-2 border rounded-md w-full mb-2" required>
-                <input type="text" id="offer-description" placeholder="描述 (必填)" class="p-2 border rounded-md w-full mb-2" required>
-                <input type="number" id="offer-original-price" placeholder="原價 (必填)" class="p-2 border rounded-md w-full mb-2" required>
-                <input type="number" id="offer-special-price" placeholder="特價 (必填)" class="p-2 border rounded-md w-full mb-4" required>
-                <input type="text" id="offer-image" placeholder="圖片URL (例如: placehold.co)" class="p-2 border rounded-md w-full mb-4">
-                <div class="flex gap-2">
-                    <button id="add-offer" class="btn-purple">新增優惠</button>
-                    <button id="update-offer" class="btn-yellow">更新選定優惠</button>
-                    <button id="clear-offer-form" class="btn-blue">清除表單</button>
-                </div>
-            </div>
-        </section>
-    </div>
-
-    <!-- Admin Message Modal -->
-    <div id="adminMessageModal" class="admin-modal">
-        <div class="admin-modal-content">
-            <span class="admin-modal-close-button" onclick="closeAdminMessageModal()">&times;</span>
-            <h3 id="adminModalTitle" class="text-2xl font-bold mb-4"></h3>
-            <p id="adminModalMessage" class="text-gray-700 mb-6"></p>
-            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md" onclick="closeAdminMessageModal()">了解</button>
         </div>
     </div>
 
+    <!-- Firebase SDKs -->
     <script type="module">
-        // Import Firebase services - MUST be at the top level of a module script
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, doc, setDoc, addDoc, updateDoc, deleteDoc, query, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Start IIFE for encapsulation of the main logic
-        (async function() {
-            // Firebase Initialization
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-            const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        // Firebase Configuration (Global variables provided by Canvas environment)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
 
-            let app;
-            let db;
-            let auth;
-            let userId = 'anonymous'; // Default to anonymous
+        let app;
+        let db;
+        let auth;
+        let productsCollectionRef;
+        let currentEditingProductId = null; // To keep track of the product being edited
+
+        // Initial coffee products to populate if the collection is empty
+        const initialCoffeeProducts = [
+            {
+                name: '衣索比亞 GEISHA 水洗 (百香果)',
+                country: '衣索比亞',
+                variety: 'GEISHA 水洗',
+                processing: '水洗',
+                altitude: 'N/A',
+                weight: '114克',
+                roast: '淺焙',
+                expiry: '2025-10-12', // YYYY-MM-DD format for date input
+                price: 280,
+                flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬、百香果',
+                image: 'https://placehold.co/200x120/e0e0e0/3f2e2e?text=Ethiopia+Geisha',
+                stock: 50,
+                farm_or_station: 'N/A',
+                lifestyle: '清新愉悅的早晨，搭配輕食或獨自品味，感受花果香氣的奔放。',
+                profile: [30, 90, 60, 95, 40] // Bitter, Acidity, Body, Floral/Fruit, Nut/Chocolate
+            },
+            {
+                name: '衣索比亞 Heirloom 雙重厭氧水洗',
+                country: '衣索比亞',
+                variety: 'Heirloom',
+                processing: '雙重厭氧水洗',
+                altitude: '2000-2100公尺',
+                weight: '227克',
+                roast: '淺焙',
+                expiry: '2025-10-28',
+                price: 600,
+                flavor: '茉莉、橙花、蜂蜜、水蜜桃',
+                image: 'https://placehold.co/200x120/e0e0e0/3f2e2e?text=Ethiopia+Heirloom',
+                stock: 75,
+                farm_or_station: 'N/A',
+                lifestyle: '午後茶點時光，享受其細膩的甜感和豐富的層次，適合靜心品嚐。',
+                profile: [40, 85, 70, 90, 50]
+            },
+            {
+                name: '衣索比亞 GEISHA (227g)',
+                country: '衣索比亞',
+                variety: 'GEISHA',
+                processing: 'N/A',
+                altitude: 'N/A',
+                weight: '227克',
+                roast: '中淺焙',
+                expiry: '2025-11-01',
+                price: 540,
+                flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬',
+                image: 'https://placehold.co/200x120/e0e0e0/3f2e2e?text=Ethiopia+Geisha+227g',
+                stock: 60,
+                farm_or_station: 'N/A',
+                lifestyle: '適合在需要靈感或專注的時刻品飲，其複雜的香氣能激發思緒。',
+                profile: [35, 90, 65, 90, 45]
+            },
+            {
+                name: '衣索比亞 GEISHA 水洗 (227g, 高海拔)',
+                country: '衣索比亞',
+                variety: 'GEISHA 水洗',
+                processing: '水洗',
+                altitude: '2280公尺',
+                weight: '227克',
+                roast: '中淺焙',
+                expiry: '2025-11-01',
+                price: 540,
+                flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬',
+                image: 'https://placehold.co/200x120/e0e0e0/3f2e2e?text=Ethiopia+Geisha+HighAlt',
+                stock: 45,
+                farm_or_station: 'N/A',
+                lifestyle: '高海拔咖啡的獨特風味，適合在悠閒的週末午後，享受其純淨與層次。',
+                profile: [30, 95, 60, 95, 40]
+            },
+            {
+                name: '衣索比亞 精選淺焙 (227g)',
+                country: '衣索比亞',
+                variety: '精選',
+                processing: 'N/A',
+                altitude: 'N/A',
+                weight: '227克',
+                roast: '淺焙',
+                expiry: '2025-11-01',
+                price: 540,
+                flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬',
+                image: 'https://placehold.co/200x120/e0e0e0/3f2e2e?text=Ethiopia+Selected',
+                stock: 70,
+                farm_or_station: 'N/A',
+                lifestyle: '每日早晨的活力泉源，讓您在忙碌中也能品味到非洲的陽光與花香。',
+                profile: [35, 88, 62, 92, 42]
+            },
+            {
+                name: '哥斯大黎加 Geisha 白蜜 (114g)',
+                country: '哥斯大黎加',
+                variety: 'Geisha（藝妓）',
+                processing: '白蜜',
+                altitude: '1950公尺',
+                weight: '114克',
+                roast: '淺',
+                expiry: '2025-08-15',
+                price: 800,
+                flavor: '百合花、野薑花、檸檬草、柑橘、紅色莓果、蜂蜜',
+                image: 'https://placehold.co/200x120/e0e0e0/3f2e2e?text=CostaRica+Geisha+114g',
+                stock: 30,
+                farm_or_station: '聖伊西多羅',
+                lifestyle: '獨特的藝妓風味，適合在特別的節日或與摯友分享，體驗其優雅與複雜。',
+                profile: [40, 92, 68, 88, 55]
+            },
+            {
+                name: '哥斯大黎加 Geisha 白蜜 (227g)',
+                country: '哥斯大黎加',
+                variety: 'Geisha（藝妓）',
+                processing: '白蜜',
+                altitude: '1950公尺',
+                weight: '227克',
+                roast: '淺',
+                expiry: '2025-08-15',
+                price: 1800,
+                flavor: '百合花、野薑花、檸檬草、柑橘、紅色莓果、蜂蜜',
+                image: 'https://placehold.co/200x120/e0e0e0/3f2e2e?text=CostaRica+Geisha+227g',
+                stock: 20,
+                farm_or_station: '聖伊西多羅',
+                lifestyle: '珍稀的藝妓咖啡，適合深度咖啡愛好者，在寧靜的夜晚細細品味。',
+                profile: [40, 92, 68, 88, 55]
+            }
+        ];
+
+        // Custom Modal Functions
+        function showAdminMessageModal(title, message, type = 'info', onConfirm = null) {
+            const modal = document.getElementById('adminMessageModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const modalIcon = document.getElementById('modalIcon');
+            const modalButtons = document.getElementById('modalButtons');
+
+            // Reset classes and content
+            modalTitle.className = 'text-2xl font-serif mb-4';
+            modalIcon.className = 'text-5xl mb-4';
+            modalButtons.innerHTML = ''; // Clear previous buttons
+
+            modalTitle.textContent = title;
+            modalMessage.innerHTML = message; // Use innerHTML to allow for basic HTML tags if needed
+
+            // Set icon and title color based on type
+            switch (type) {
+                case 'success':
+                    modalIcon.innerHTML = '<i class="fas fa-check-circle icon-success"></i>';
+                    break;
+                case 'error':
+                    modalIcon.innerHTML = '<i class="fas fa-times-circle icon-error"></i>';
+                    break;
+                case 'info':
+                default:
+                    modalIcon.innerHTML = '<i class="fas fa-info-circle icon-info"></i>';
+                    break;
+            }
+
+            if (onConfirm) {
+                const confirmBtn = document.createElement('button');
+                confirmBtn.className = 'btn-danger px-6 py-2 rounded-full';
+                confirmBtn.textContent = '確認刪除';
+                confirmBtn.onclick = () => {
+                    onConfirm();
+                    closeAdminMessageModal();
+                };
+                modalButtons.appendChild(confirmBtn);
+
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = 'btn-secondary px-6 py-2 rounded-full';
+                cancelBtn.textContent = '取消';
+                cancelBtn.onclick = closeAdminMessageModal;
+                modalButtons.appendChild(cancelBtn);
+            } else {
+                const okBtn = document.createElement('button');
+                okBtn.className = 'btn-primary px-6 py-2 rounded-full';
+                okBtn.textContent = '確認';
+                okBtn.onclick = closeAdminMessageModal;
+                modalButtons.appendChild(okBtn);
+            }
+
+            modal.classList.add('active'); // Show modal
+        }
+
+        function closeAdminMessageModal() {
+            document.getElementById('adminMessageModal').classList.remove('active');
+        }
+
+        // Firebase Initialization
+        async function initializeFirebase() {
+            if (Object.keys(firebaseConfig).length === 0) {
+                console.error("Firebase config not found. Admin panel will not function.");
+                showAdminMessageModal('設定錯誤', 'Firebase 設定檔遺失。請檢查環境變數。', 'error');
+                return;
+            }
+
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+
+            productsCollectionRef = collection(db, `artifacts/${appId}/public/data/coffeeProducts`);
 
             try {
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-
-                // Authenticate with custom token or anonymously
-                if (typeof __initial_auth_token !== 'undefined') {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                // Set userId after authentication
-                userId = auth.currentUser?.uid || crypto.randomUUID();
-                console.log(`Firestore Authenticated. User ID: ${userId}`);
-
-            } catch (error) {
-                console.error("Firebase initialization or authentication failed:", error);
-                showAdminMessageModal('錯誤', `Firebase 初始化失敗: ${error.message}`, 'error');
-                return; // Stop execution if Firebase fails to initialize
-            }
-
-            // 📦 dataManager.js - 統一優惠資料管理模組
-            // Note: This dataManager logic will now primarily act as a schema definition and default provider
-            // The actual loading/saving will be handled by Firestore
-            const defaultOfferTemplate = {
-                id: '', // Will use Firestore doc.id
-                name: '',
-                description: '',
-                originalPrice: 0,
-                specialPrice: 0,
-                image: ''
-            };
-
-            // 新增預設優惠活動資料，確保前後台預設值一致
-            const DEFAULT_SPECIAL_OFFERS = [
-                { id: 'default-offer-1', name: '預設優惠：系統初始體驗包', description: '這是系統預設的優惠，如果資料庫中沒有數據，將會顯示此優惠。', originalPrice: 500, specialPrice: 400, image: 'https://placehold.co/400x200/b58863/FFFFFF?text=Default+Offer' }
-            ];
-
-            /**
-             * 🧠 mergeWithDefaultSchema
-             * 將輸入的每筆資料補齊為與預設欄位一致的格式
-             * @param {Array<Object>} dataArray - 原始優惠資料
-             * @param {Object} defaultTemplate - 欄位模板
-             * @returns {Array<Object>}
-             */
-            function mergeWithDefaultSchema(dataArray, defaultTemplate) {
-                if (!Array.isArray(dataArray)) return [];
-                return dataArray.map(item => ({
-                    ...defaultTemplate,
-                    ...item
-                }));
-            }
-
-            // Expose OfferDataManager globally if needed for other scripts (though now primarily internal)
-            window.OfferDataManager = {
-                mergeWithDefaultSchema,
-                defaultOfferTemplate,
-                DEFAULT_SPECIAL_OFFERS 
-            };
-            // 📦 dataManager.js END
-
-            // --- Firestore Collection References ---
-            const coffeeBeansCollection = collection(db, `artifacts/${appId}/users/${userId}/coffeeBeans`);
-            const specialOffersCollection = collection(db, `artifacts/${appId}/users/${userId}/specialOffers`);
-
-            // --- Default Data (Hardcoded for initial setup if Firestore is empty) ---
-            const defaultCoffeeBeans = [
-                { name: 'GEISHA 水洗（114g）', country: '衣索比亞', variety: 'GEISHA 水洗', flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬、百香果', roast: '淺焙', weight: '114g', expiryDate: '2025-10-12', price: 280, stock: 10, category: 'light', image: './image/image_1.png', flavorProfile: { acidity: 4, body: 2, sweetness: 4, aroma: 5, finish: 4 }, lifestyle: '這款咖啡充滿複雜的香氣與明亮的風味，適合在靜謐的午後細細品味，或搭配輕盈的甜點。' },
-                { name: 'Heirloom 雙重厭氧（227g）- 批次A', country: '衣索比亞', variety: 'Heirloom', flavor: '茉莉、橙花、蜂蜜、水蜜桃', roast: '淺焙', weight: '227g', expiryDate: '2025-10-28', price: 600, stock: 5, category: 'light', image: './image/image_2.png', flavorProfile: { acidity: 4, body: 3, sweetness: 5, aroma: 5, finish: 4 }, lifestyle: '甜美而豐富的口感，是開啟美好一天的理想選擇，與早餐糕點搭配尤佳。' },
-                { name: 'Heirloom 雙重厭氧（227g）- 批次B', country: '衣索比亞', variety: 'Heirloom', flavor: '茉莉、橙花、蜂蜜、水蜜桃', roast: '淺焙', weight: '227g', expiryDate: '2025-10-31', price: 600, stock: 8, category: 'light', image: './image/image_3.png', flavorProfile: { acidity: 4, body: 3, sweetness: 5, aroma: 5, finish: 4 }, lifestyle: '相同的風味，不同的採收批次，確保每一杯都有始終如一的甜蜜與芬芳。' },
-                { name: 'GEISHA（227g）中淺焙', country: '衣索比亞', variety: 'GEISHA', flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬', roast: '中淺焙', weight: '227g', expiryDate: '2025-11-01', price: 540, stock: 12, category: 'medium', image: './image/image_4.png', flavorProfile: { acidity: 3, body: 3, sweetness: 3, aroma: 4, finish: 3 }, lifestyle: '平衡的風味與較低的酸度，適合日常飲用，無論是搭配閱讀或工作，都能帶來愉悅感受。' },
-                { name: 'GEISHA 水洗（227g）2280m', country: '衣索比亞', variety: 'GEISHA 水洗', flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬', roast: '中淺焙', weight: '227g', expiryDate: '2025-11-05', price: 580, stock: 0, category: 'light', image: './image/image_5.png', flavorProfile: { acidity: 4, body: 2, sweetness: 4, aroma: 5, finish: 4 }, lifestyle: '來自高海拔的獨特風味，建議在需要提振精神的早晨品嚐，感受其清晰明亮的層次。' },
-                { name: '衣索比亞 淺焙（227g）', country: '衣索比亞', variety: '', flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬', roast: '淺焙', weight: '227g', expiryDate: '2025-11-01', price: 540, stock: 7, category: 'light', image: './image/image_6.png', flavorProfile: { acidity: 4, body: 2, sweetness: 4, aroma: 5, finish: 4 }, lifestyle: '輕盈的花果調性，是下午茶時光的完美伴侶，能為您的休憩時刻增添一抹亮色。' },
-                { name: '哥斯大黎加 Geisha 白蜜（114g）', country: '哥斯大黎加', variety: 'Geisha（藝妓）', flavor: '百合花、野薑花、檸檬草、柑橘、紅色莓果、蜂蜜', roast: '淺焙', weight: '114g', expiryDate: '2025-08-15', price: 800, stock: 3, category: 'light', image: './image/image_7.png', flavorProfile: { acidity: 5, body: 3, sweetness: 4, aroma: 5, finish: 4 }, lifestyle: '此款藝妓咖啡風味精緻優雅，適合在重要時刻或與好友分享，搭配簡約的甜點以突顯其豐富層次。' },
-                { name: '哥斯大黎加 淺焙（227g）', country: '哥斯大黎加', variety: '', flavor: '百合花、野薑花、檸檬草、柑橘、紅色莓果、蜂蜜', roast: '淺焙', weight: '227g', expiryDate: '2025-08-15', price: 1800, stock: 1, category: 'light', image: './image/image_8.png', flavorProfile: { acidity: 5, body: 3, sweetness: 4, aroma: 5, finish: 4 }, lifestyle: '大容量包裝讓您能更長時間地享受藝妓咖啡的迷人魅力，每日品飲或作為珍貴贈禮皆宜。' }
-            ];
-
-            // --- Data Variables (will be populated from Firestore) ---
-            let coffeeBeans = [];
-            let specialOffers = [];
-
-            // --- DOM Elements ---
-            const adminCoffeeList = document.getElementById('admin-coffee-list');
-            const loadCoffeeBtn = document.getElementById('load-coffee-data');
-            const saveCoffeeBtn = document.getElementById('save-coffee-data'); // This button will now trigger a full data re-sync
-            const addCoffeeBtn = document.getElementById('add-coffee');
-            const updateCoffeeBtn = document.getElementById('update-coffee');
-            const clearCoffeeFormBtn = document.getElementById('clear-coffee-form');
-
-            const editCoffeeIdInput = document.getElementById('edit-coffee-id');
-            const coffeeNameInput = document.getElementById('coffee-name');
-            const coffeeCountryInput = document.getElementById('coffee-country');
-            const coffeeVarietyInput = document.getElementById('coffee-variety');
-            const coffeeFlavorInput = document.getElementById('coffee-flavor');
-            const coffeeRoastInput = document.getElementById('coffee-roast');
-            const coffeeWeightInput = document.getElementById('coffee-weight');
-            const coffeePriceInput = document.getElementById('coffee-price');
-            const coffeeExpiryInput = document.getElementById('coffee-expiry');
-            const coffeeStockInput = document.getElementById('coffee-stock');
-            const coffeeCategoryInput = document.getElementById('coffee-category');
-            const coffeeImageInput = document.getElementById('coffee-image');
-            const coffeeLifestyleInput = document.getElementById('coffee-lifestyle');
-
-            const fpAcidityInput = document.getElementById('fp-acidity');
-            const fpBodyInput = document.getElementById('fp-body');
-            const fpSweetnessInput = document.getElementById('fp-sweetness');
-            const fpAromaInput = document.getElementById('fp-aroma');
-            const fpFinishInput = document.getElementById('fp-finish');
-
-            const adminOfferList = document.getElementById('admin-offer-list');
-            const loadOfferBtn = document.getElementById('load-offer-data');
-            const saveOfferBtn = document.getElementById('save-offer-data'); // This button will now trigger a full data re-sync
-            const addOfferBtn = document.getElementById('add-offer');
-            const updateOfferBtn = document.getElementById('update-offer');
-            const clearOfferFormBtn = document.getElementById('clear-offer-form');
-
-            const editOfferIdInput = document.getElementById('edit-offer-id');
-            const offerNameInput = document.getElementById('offer-name');
-            const offerDescriptionInput = document.getElementById('offer-description');
-            const offerOriginalPriceInput = document.getElementById('offer-original-price');
-            const offerSpecialPriceInput = document.getElementById('offer-special-price');
-            const offerImageInput = document.getElementById('offer-image');
-
-            // --- Admin Message Modal Elements ---
-            const adminMessageModal = document.getElementById('adminMessageModal');
-            const adminModalTitle = document.getElementById('adminModalTitle');
-            const adminModalMessage = document.getElementById('adminModalMessage');
-
-            /**
-             * Shows the custom admin message modal.
-             * @param {string} title - The title of the message.
-             * @param {string} message - The message content.
-             * @param {string} type - 'success' or 'error' to change title color.
-             * @param {function} [onConfirm] - Optional callback function for confirm type modals.
-             * @param {boolean} [isConfirm=false] - Whether this modal is a confirmation dialog.
-             */
-            function showAdminMessageModal(title, message, type = 'info', onConfirm = null, isConfirm = false) {
-                adminModalTitle.textContent = title;
-                adminModalMessage.textContent = message;
-                adminModalTitle.classList.remove('admin-modal-success', 'admin-modal-error');
+                // Sign in anonymously for admin panel. In a real app, you'd use proper authentication.
+                const userCredential = await signInAnonymously(auth);
+                console.log("[Firebase] Admin signed in anonymously:", userCredential.user.uid);
                 
-                const confirmButton = adminMessageModal.querySelector('button');
-                const originalButtonText = "了解"; // Default button text
-                confirmButton.onclick = closeAdminMessageModal; // Default close action
-
-                if (type === 'success') {
-                    adminModalTitle.classList.add('admin-modal-success');
-                } else if (type === 'error') {
-                    adminModalTitle.classList.add('admin-modal-error');
+                // Check if the collection is empty and populate with initial data
+                const existingDocs = await getDocs(productsCollectionRef);
+                if (existingDocs.empty) {
+                    showAdminMessageModal('初始化資料', '首次載入，正在初始化咖啡豆資料...', 'info');
+                    for (const product of initialCoffeeProducts) {
+                        await addDoc(productsCollectionRef, product);
+                    }
+                    showAdminMessageModal('初始化完成', '咖啡豆資料已成功初始化！', 'success');
                 }
 
-                if (isConfirm && onConfirm) {
-                    confirmButton.textContent = "確認";
-                    confirmButton.onclick = () => {
-                        onConfirm();
-                        closeAdminMessageModal();
-                    };
-                    // For simplicity, keeping it as one button that triggers action then closes.
-                } else {
-                    confirmButton.textContent = originalButtonText;
-                }
-                adminMessageModal.style.display = 'flex';
+                listenToProducts(); // Start listening for real-time updates
+            } catch (error) {
+                console.error("[Firebase] Admin authentication or initialization error:", error);
+                showAdminMessageModal('登入錯誤', `無法登入 Firebase：${error.message}`, 'error');
             }
+        }
 
-            /**
-             * Closes the custom admin message modal.
-             */
-            function closeAdminMessageModal() {
-                adminMessageModal.style.display = 'none';
-            }
+        // Listen for real-time updates to the coffeeProducts collection
+        function listenToProducts() {
+            const q = query(productsCollectionRef, orderBy('name')); // Order by name for consistent display
 
-            // --- Coffee Bean Functions (Firestore) ---
-            function renderCoffeeBeansAdmin() {
-                adminCoffeeList.innerHTML = '';
-                if (coffeeBeans.length === 0) {
-                    adminCoffeeList.innerHTML = '<li>目前沒有咖啡豆數據。</li>';
-                    return;
-                }
-                coffeeBeans.forEach(bean => {
-                    const listItem = document.createElement('li');
-                    listItem.dataset.id = bean.id; // Use Firestore doc.id
-                    listItem.innerHTML = `
-                        <span>${bean.name} (NT$${bean.price}) - 庫存: ${bean.stock}</span>
-                        <div>
-                            <button class="btn-yellow text-sm py-1 px-2 mr-1 edit-coffee-btn">編輯</button>
-                            <button class="btn-red text-sm py-1 px-2 delete-coffee-btn">刪除</button>
-                        </div>
-                    `;
-                    adminCoffeeList.appendChild(listItem);
+            onSnapshot(q, (snapshot) => {
+                const products = [];
+                snapshot.forEach((doc) => {
+                    products.push({ id: doc.id, ...doc.data() });
                 });
-
-                // Attach event listeners for edit and delete
-                document.querySelectorAll('.edit-coffee-btn').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        const id = e.target.closest('li').dataset.id;
-                        const beanToEdit = coffeeBeans.find(b => b.id === id); // Find by Firestore ID
-                        if (beanToEdit) {
-                            editCoffeeIdInput.value = beanToEdit.id;
-                            coffeeNameInput.value = beanToEdit.name;
-                            coffeeCountryInput.value = beanToEdit.country || '';
-                            coffeeVarietyInput.value = beanToEdit.variety || '';
-                            coffeeFlavorInput.value = beanToEdit.flavor;
-                            coffeeRoastInput.value = beanToEdit.roast || '';
-                            coffeeWeightInput.value = beanToEdit.weight || '';
-                            coffeePriceInput.value = beanToEdit.price;
-                            coffeeExpiryInput.value = beanToEdit.expiryDate;
-                            coffeeStockInput.value = beanToEdit.stock;
-                            coffeeCategoryInput.value = beanToEdit.category || '';
-                            coffeeImageInput.value = beanToEdit.image;
-                            coffeeLifestyleInput.value = beanToEdit.lifestyle;
-
-                            if (beanToEdit.flavorProfile) {
-                                fpAcidityInput.value = beanToEdit.flavorProfile.acidity || 0;
-                                fpBodyInput.value = beanToEdit.flavorProfile.body || 0;
-                                fpSweetnessInput.value = beanToEdit.flavorProfile.sweetness || 0;
-                                fpAromaInput.value = beanToEdit.flavorProfile.aroma || 0;
-                                fpFinishInput.value = beanToEdit.flavorProfile.finish || 0;
-                            } else {
-                                fpAcidityInput.value = ''; fpBodyInput.value = ''; fpSweetnessInput.value = '';
-                                fpAromaInput.value = ''; fpFinishInput.value = '';
-                            }
-                        }
-                    });
-                });
-
-                document.querySelectorAll('.delete-coffee-btn').forEach(button => {
-                    button.addEventListener('click', async (e) => {
-                        const id = e.target.closest('li').dataset.id;
-                        showAdminMessageModal('確認刪除', '確定要刪除此咖啡豆嗎？', 'info', async () => {
-                            try {
-                                await deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/coffeeBeans`, id));
-                                showAdminMessageModal('成功', '咖啡豆已刪除！', 'success');
-                                clearCoffeeForm();
-                            } catch (error) {
-                                console.error("Error deleting coffee bean:", error);
-                                showAdminMessageModal('錯誤', `刪除咖啡豆失敗: ${error.message}`, 'error');
-                            }
-                        }, true); // Pass true for confirmation
-                    });
-                });
-            }
-
-            // Load coffee beans from Firestore with real-time listener
-            function loadCoffeeBeans() {
-                onSnapshot(query(coffeeBeansCollection), (snapshot) => {
-                    const beansFromFirestore = [];
-                    snapshot.forEach(doc => {
-                        beansFromFirestore.push({ id: doc.id, ...doc.data() });
-                    });
-
-                    if (beansFromFirestore.length === 0) {
-                        // If Firestore is empty, seed with default data
-                        if (coffeeBeans.length === 0) { // Only seed if local array is also empty
-                             defaultCoffeeBeans.forEach(async (bean) => {
-                                try {
-                                    // Use setDoc with a generated ID if you want a specific ID,
-                                    // or addDoc for auto-generated ID without specifying.
-                                    // For initial seeding, using addDoc is simpler.
-                                    await addDoc(coffeeBeansCollection, bean);
-                                } catch (error) {
-                                    console.error("Error seeding default coffee bean:", error);
-                                }
-                            });
-                            showAdminMessageModal('載入成功', '資料庫無數據，已載入預設咖啡豆數據。', 'success');
-                        } else {
-                            showAdminMessageModal('載入成功', '資料庫無數據，請新增或儲存咖啡豆。', 'info');
-                        }
-                    } else {
-                        coffeeBeans = beansFromFirestore;
-                        showAdminMessageModal('載入成功', '咖啡豆數據已從資料庫載入。', 'success');
-                    }
-                    renderCoffeeBeansAdmin();
-                    clearCoffeeForm();
-                }, (error) => {
-                    console.error("Error listening to coffee beans:", error);
-                    showAdminMessageModal('錯誤', `載入咖啡豆數據失敗: ${error.message}`, 'error');
-                });
-            }
-
-            // Save coffee beans to Firestore (re-sync or add/update based on edit-coffee-id)
-            async function saveCoffeeBeans() {
-                showAdminMessageModal('資訊', '正在將咖啡豆數據同步到資料庫...', 'info');
-                try {
-                    // Fetch current data from the UI to ensure we save what's displayed or edited
-                    const currentBeansOnUI = [];
-                    document.querySelectorAll('#admin-coffee-list li').forEach(li => {
-                        const id = li.dataset.id;
-                        const bean = coffeeBeans.find(b => b.id === id); // Get the full bean object
-                        if (bean) {
-                            currentBeansOnUI.push(bean);
-                        }
-                    });
-
-                    // Clear existing collection (this is a simple sync, for real apps consider merge/batch writes)
-                    // Note: This approach clears and re-adds. For large datasets, this is inefficient.
-                    // A better approach would be to track changes (add/update/delete) locally and apply them via batch writes.
-                    // For simplicity, we will just rely on the onSnapshot listener for updates after add/update/delete actions.
-                    // This button will now serve more as a "Trigger Initial Load/Re-seed" if needed.
-                    
-                    // For a "Save All" button, a more robust logic would be to compare local `coffeeBeans`
-                    // with current Firestore data and perform batched updates/deletes/adds.
-                    // However, given the onSnapshot is already active and handling real-time,
-                    // this button's primary role might simply be to trigger a re-seed if the collection is empty.
-                    
-                    // Let's keep this as a simple "Confirm data is loaded/synced" rather than a destructive "save all".
-                    // The add/update/delete buttons will handle the actual Firestore writes.
-                    
-                    // To truly "save all" as implied by the button, we would iterate `coffeeBeans` and `setDoc` each.
-                    // For this example, let's just confirm the onSnapshot is working.
-                    
-                    // If the user truly expects "Save all currently visible items to Firestore",
-                    // we would fetch all documents and delete them, then re-add everything in `coffeeBeans`.
-                    // This is usually not how real-time databases are used.
-                    // Let's change the button's behavior to re-load from Firestore,
-                    // and rely on the Add/Update/Delete buttons for actual writes.
-                    
-                    // Re-calling loadCoffeeBeans will refresh the data from Firestore.
-                    loadCoffeeBeans(); 
-                    showAdminMessageModal('已同步', '咖啡豆數據已與資料庫同步。', 'success'); // Change message
-                } catch (error) {
-                    console.error("Error saving coffee beans:", error);
-                    showAdminMessageModal('錯誤', `儲存咖啡豆數據失敗: ${error.message}`, 'error');
-                }
-            }
-
-            function clearCoffeeForm() {
-                editCoffeeIdInput.value = '';
-                coffeeNameInput.value = '';
-                coffeeCountryInput.value = '';
-                coffeeVarietyInput.value = '';
-                coffeeFlavorInput.value = '';
-                coffeeRoastInput.value = '';
-                coffeeWeightInput.value = '';
-                coffeePriceInput.value = '';
-                coffeeExpiryInput.value = '';
-                coffeeStockInput.value = '';
-                coffeeCategoryInput.value = '';
-                coffeeImageInput.value = '';
-                coffeeLifestyleInput.value = '';
-                fpAcidityInput.value = '';
-                fpBodyInput.value = '';
-                fpSweetnessInput.value = '';
-                fpAromaInput.value = '';
-                fpFinishInput.value = '';
-            }
-
-            // --- Special Offer Functions (Firestore) ---
-            function renderSpecialOffersAdmin() {
-                adminOfferList.innerHTML = '';
-                if (specialOffers.length === 0) {
-                    adminOfferList.innerHTML = '<li>目前沒有優惠活動數據。</li>';
-                    return;
-                }
-                specialOffers.forEach(offer => {
-                    const listItem = document.createElement('li');
-                    listItem.dataset.id = offer.id; // Use Firestore doc.id
-                    listItem.innerHTML = `
-                        <span>${offer.name} (NT$${offer.specialPrice})</span>
-                        <div>
-                            <button class="btn-yellow text-sm py-1 px-2 mr-1 edit-offer-btn">編輯</button>
-                            <button class="btn-red text-sm py-1 px-2 delete-offer-btn">刪除</button>
-                        </div>
-                    `;
-                    adminOfferList.appendChild(listItem);
-                });
-
-                // Attach event listeners for edit and delete
-                document.querySelectorAll('.edit-offer-btn').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        const id = e.target.closest('li').dataset.id;
-                        const offerToEdit = specialOffers.find(o => o.id === id);
-                        if (offerToEdit) {
-                            editOfferIdInput.value = offerToEdit.id;
-                            offerNameInput.value = offerToEdit.name;
-                            offerDescriptionInput.value = offerToEdit.description;
-                            offerOriginalPriceInput.value = offerToEdit.originalPrice;
-                            offerSpecialPriceInput.value = offerToEdit.specialPrice;
-                            offerImageInput.value = offerToEdit.image;
-                        }
-                    });
-                });
-
-                document.querySelectorAll('.delete-offer-btn').forEach(button => {
-                    button.addEventListener('click', async (e) => {
-                        const id = e.target.closest('li').dataset.id;
-                        showAdminMessageModal('確認刪除', '確定要刪除此優惠嗎？', 'info', async () => {
-                            try {
-                                await deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/specialOffers`, id));
-                                showAdminMessageModal('成功', '優惠活動已刪除！', 'success');
-                                clearOfferForm();
-                            } catch (error) {
-                                console.error("Error deleting offer:", error);
-                                showAdminMessageModal('錯誤', `刪除優惠失敗: ${error.message}`, 'error');
-                            }
-                        }, true); // Pass true for confirmation
-                    });
-                });
-            }
-
-            // Load special offers from Firestore with real-time listener
-            function loadSpecialOffers() {
-                onSnapshot(query(specialOffersCollection), (snapshot) => {
-                    const offersFromFirestore = [];
-                    snapshot.forEach(doc => {
-                        offersFromFirestore.push({ id: doc.id, ...doc.data() });
-                    });
-
-                    if (offersFromFirestore.length === 0) {
-                        // If Firestore is empty, seed with default data
-                        if (specialOffers.length === 0) { // Only seed if local array is also empty
-                            window.OfferDataManager.DEFAULT_SPECIAL_OFFERS.forEach(async (offer) => {
-                                try {
-                                    // Use setDoc with the default ID
-                                    await setDoc(doc(db, `artifacts/${appId}/users/${userId}/specialOffers`, offer.id), offer);
-                                } catch (error) {
-                                    console.error("Error seeding default special offer:", error);
-                                }
-                            });
-                            showAdminMessageModal('載入成功', '資料庫無數據，已載入預設優惠活動。', 'success');
-                        } else {
-                            showAdminMessageModal('載入成功', '資料庫無數據，請新增或儲存優惠活動。', 'info');
-                        }
-                    } else {
-                        specialOffers = offersFromFirestore;
-                        showAdminMessageModal('載入成功', '優惠數據已從資料庫載入。', 'success');
-                    }
-                    renderSpecialOffersAdmin();
-                    clearOfferForm();
-                }, (error) => {
-                    console.error("Error listening to special offers:", error);
-                    showAdminMessageModal('錯誤', `載入優惠數據失敗: ${error.message}`, 'error');
-                });
-            }
-
-            // Save special offers to Firestore (re-sync or add/update based on edit-offer-id)
-            async function saveSpecialOffers() {
-                showAdminMessageModal('資訊', '正在將優惠數據同步到資料庫...', 'info');
-                try {
-                    loadSpecialOffers(); // Re-calling load will refresh from Firestore
-                    showAdminMessageModal('已同步', '優惠數據已與資料庫同步。', 'success'); // Change message
-                } catch (error) {
-                    console.error("Error saving special offers:", error);
-                    showAdminMessageModal('錯誤', `儲存優惠數據失敗: ${error.message}`, 'error');
-                }
-            }
-
-            function clearOfferForm() {
-                editOfferIdInput.value = '';
-                offerNameInput.value = '';
-                offerDescriptionInput.value = '';
-                offerOriginalPriceInput.value = '';
-                offerSpecialPriceInput.value = '';
-                offerImageInput.value = '';
-            }
-
-            // --- Event Listeners ---
-            document.addEventListener('DOMContentLoaded', () => {
-                // Coffee Bean Event Listeners
-                loadCoffeeBtn.addEventListener('click', loadCoffeeBeans);
-                saveCoffeeBtn.addEventListener('click', saveCoffeeBeans); // Now acts as a re-load/sync trigger
-
-                addCoffeeBtn.addEventListener('click', async () => {
-                    if (!coffeeNameInput.value || !coffeePriceInput.value || coffeeStockInput.value === '') {
-                        showAdminMessageModal('輸入錯誤', '請填寫所有標註為「必填」的咖啡豆欄位。', 'error');
-                        return;
-                    }
-
-                    const newBeanData = {
-                        name: coffeeNameInput.value,
-                        country: coffeeCountryInput.value,
-                        variety: coffeeVarietyInput.value,
-                        flavor: coffeeFlavorInput.value,
-                        roast: coffeeRoastInput.value,
-                        weight: coffeeWeightInput.value,
-                        price: parseFloat(coffeePriceInput.value) || 0,
-                        expiryDate: coffeeExpiryInput.value,
-                        stock: parseInt(coffeeStockInput.value) || 0,
-                        category: coffeeCategoryInput.value,
-                        image: coffeeImageInput.value || 'https://placehold.co/400x200/cccccc/333333?text=新咖啡豆',
-                        flavorProfile: { 
-                            acidity: parseFloat(fpAcidityInput.value) || 0, 
-                            body: parseFloat(fpBodyInput.value) || 0, 
-                            sweetness: parseFloat(fpSweetnessInput.value) || 0, 
-                            aroma: parseFloat(fpAromaInput.value) || 0, 
-                            finish: parseFloat(fpFinishInput.value) || 0 
-                        }, 
-                        lifestyle: coffeeLifestyleInput.value || '享受一杯美好的咖啡。'
-                    };
-
-                    try {
-                        await addDoc(coffeeBeansCollection, newBeanData);
-                        showAdminMessageModal('成功', '咖啡豆已新增！', 'success');
-                        clearCoffeeForm();
-                    } catch (error) {
-                        console.error("Error adding coffee bean:", error);
-                        showAdminMessageModal('錯誤', `新增咖啡豆失敗: ${error.message}`, 'error');
-                    }
-                });
-
-                updateCoffeeBtn.addEventListener('click', async () => {
-                    const idToUpdate = editCoffeeIdInput.value;
-                    if (!idToUpdate) {
-                        showAdminMessageModal('更新錯誤', '請選擇要更新的咖啡豆。', 'error');
-                        return;
-                    }
-
-                    if (!coffeeNameInput.value || !coffeePriceInput.value || coffeeStockInput.value === '') {
-                        showAdminMessageModal('輸入錯誤', '請填寫所有標註為「必填」的咖啡豆欄位。', 'error');
-                        return;
-                    }
-
-                    const updatedBeanData = {
-                        name: coffeeNameInput.value,
-                        country: coffeeCountryInput.value,
-                        variety: coffeeVarietyInput.value,
-                        flavor: coffeeFlavorInput.value,
-                        roast: coffeeRoastInput.value,
-                        weight: coffeeWeightInput.value,
-                        price: parseFloat(coffeePriceInput.value) || 0,
-                        expiryDate: coffeeExpiryInput.value,
-                        stock: parseInt(coffeeStockInput.value) || 0,
-                        category: coffeeCategoryInput.value,
-                        image: coffeeImageInput.value || 'https://placehold.co/400x200/cccccc/333333?text=更新咖啡豆', // Provide a fallback if image is cleared
-                        lifestyle: coffeeLifestyleInput.value,
-                        flavorProfile: {
-                            acidity: parseFloat(fpAcidityInput.value) || 0,
-                            body: parseFloat(fpBodyInput.value) || 0,
-                            sweetness: parseFloat(fpSweetnessInput.value) || 0,
-                            aroma: parseFloat(fpAromaInput.value) || 0,
-                            finish: parseFloat(fpFinishInput.value) || 0
-                        }
-                    };
-
-                    try {
-                        await updateDoc(doc(db, `artifacts/${appId}/users/${userId}/coffeeBeans`, idToUpdate), updatedBeanData);
-                        showAdminMessageModal('成功', '咖啡豆已更新！', 'success');
-                        clearCoffeeForm();
-                    } catch (error) {
-                        console.error("Error updating coffee bean:", error);
-                        showAdminMessageModal('錯誤', `更新咖啡豆失敗: ${error.message}`, 'error');
-                    }
-                });
-
-                clearCoffeeFormBtn.addEventListener('click', clearCoffeeForm);
-
-                // Special Offer Event Listeners
-                loadOfferBtn.addEventListener('click', loadSpecialOffers);
-                saveOfferBtn.addEventListener('click', saveSpecialOffers); // Now acts as a re-load/sync trigger
-
-                addOfferBtn.addEventListener('click', async () => {
-                    if (!offerNameInput.value || !offerDescriptionInput.value || !offerOriginalPriceInput.value || !offerSpecialPriceInput.value) {
-                        showAdminMessageModal('輸入錯誤', '請填寫所有標註為「必填」的優惠活動欄位。', 'error');
-                        return;
-                    }
-
-                    const newOfferData = { 
-                        name: offerNameInput.value,
-                        description: offerDescriptionInput.value,
-                        originalPrice: parseFloat(offerOriginalPriceInput.value) || 0,
-                        specialPrice: parseFloat(offerSpecialPriceInput.value) || 0,
-                        image: offerImageInput.value || 'https://placehold.co/400x250/cccccc/333333?text=新優惠'
-                    };
-
-                    try {
-                        await addDoc(specialOffersCollection, newOfferData);
-                        showAdminMessageModal('成功', '優惠活動已新增！', 'success');
-                        clearOfferForm();
-                    } catch (error) {
-                        console.error("Error adding offer:", error);
-                        showAdminMessageModal('錯誤', `新增優惠失敗: ${error.message}`, 'error');
-                    }
-                });
-
-                updateOfferBtn.addEventListener('click', async () => {
-                    const idToUpdate = editOfferIdInput.value;
-                    if (!idToUpdate) {
-                        showAdminMessageModal('更新錯誤', '請選擇要更新的優惠活動。', 'error');
-                        return;
-                    }
-
-                    if (!offerNameInput.value || !offerDescriptionInput.value || !offerOriginalPriceInput.value || !offerSpecialPriceInput.value) {
-                        showAdminMessageModal('輸入錯誤', '請填寫所有標註為「必填」的優惠活動欄位。', 'error');
-                        return;
-                    }
-
-                    const updatedOfferData = {
-                        name: offerNameInput.value,
-                        description: offerDescriptionInput.value,
-                        originalPrice: parseFloat(offerOriginalPriceInput.value) || 0,
-                        specialPrice: parseFloat(offerSpecialPriceInput.value) || 0,
-                        image: offerImageInput.value || 'https://placehold.co/400x250/cccccc/333333?text=更新優惠' // Provide a fallback if image is cleared
-                    };
-                    
-                    try {
-                        await updateDoc(doc(db, `artifacts/${appId}/users/${userId}/specialOffers`, idToUpdate), updatedOfferData);
-                        showAdminMessageModal('成功', '優惠活動已更新！', 'success');
-                        clearOfferForm();
-                    } catch (error) {
-                        console.error("Error updating offer:", error);
-                        showAdminMessageModal('錯誤', `更新優惠失敗: ${error.message}`, 'error');
-                    }
-                });
-
-                clearOfferFormBtn.addEventListener('click', clearOfferForm);
-
-                // Initial load for admin panel when opened
-                // Use onAuthStateChanged to ensure Firebase is ready before loading data
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        userId = user.uid; // Ensure userId is correctly set after auth
-                        loadCoffeeBeans(); 
-                        loadSpecialOffers();
-                    } else {
-                        // User is signed out or not authenticated (e.g., anonymous failure)
-                        showAdminMessageModal('錯誤', '未認證使用者。某些功能可能無法使用。', 'error');
-                    }
-                });
+                renderProductsTable(products);
+                console.log("[Firebase] Products updated:", products.length);
+            }, (error) => {
+                console.error("[Firebase] Error listening to products:", error);
+                showAdminMessageModal('資料載入錯誤', `無法載入咖啡豆資料：${error.message}`, 'error');
             });
+        }
 
-        })(); // End IIFE
+        // Render products in the table
+        function renderProductsTable(products) {
+            const tableBody = document.getElementById('products-table-body');
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            if (products.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="15" class="text-center py-4 text-gray-500">目前沒有咖啡豆品項。</td></tr>';
+                return;
+            }
+
+            products.forEach(product => {
+                const row = tableBody.insertRow();
+                row.dataset.id = product.id; // Store Firestore document ID on the row
+
+                // Helper to get stock status class
+                const getStockStatusClass = (stock) => {
+                    if (stock > 50) return 'stock-in-stock';
+                    if (stock > 0) return 'stock-low-stock';
+                    return 'stock-out-of-stock';
+                };
+                const getStockStatusText = (stock) => {
+                    if (stock > 50) return '庫存充足';
+                    if (stock > 0) return '庫存緊張';
+                    return '已售罄';
+                };
+
+                row.innerHTML = `
+                    <td class="text-sm">${product.name || 'N/A'}</td>
+                    <td class="text-sm">${product.country || 'N/A'}</td>
+                    <td class="text-sm">${product.variety || 'N/A'}</td>
+                    <td class="text-sm">${product.processing || 'N/A'}</td>
+                    <td class="text-sm">${product.altitude || 'N/A'}</td>
+                    <td class="text-sm">${product.weight || 'N/A'}</td>
+                    <td class="text-sm">${product.roast || 'N/A'}</td>
+                    <td class="text-sm">${product.expiry || 'N/A'}</td>
+                    <td class="text-sm">NT$${product.price !== undefined ? product.price : 'N/A'}</td>
+                    <td class="text-sm">${product.stock !== undefined ? product.stock : 'N/A'} <span class="stock-indicator ${getStockStatusClass(product.stock)}">${getStockStatusText(product.stock)}</span></td>
+                    <td class="text-sm max-w-xs overflow-hidden text-ellipsis whitespace-nowrap" title="${product.flavor || 'N/A'}">${product.flavor || 'N/A'}</td>
+                    <td class="text-sm">
+                        ${product.image ? `<img src="${product.image}" alt="圖片" class="w-16 h-auto rounded-md object-cover" onerror="this.onerror=null;this.src='https://placehold.co/64x64/e0e0e0/3f2e2e?text=No+Img';">` : '無圖片'}
+                    </td>
+                    <td class="text-sm">${product.farm_or_station || 'N/A'}</td>
+                    <td class="text-sm max-w-xs overflow-hidden text-ellipsis whitespace-nowrap" title="${product.lifestyle || 'N/A'}">${product.lifestyle || 'N/A'}</td>
+                    <td class="text-sm">
+                        <button type="button" class="text-blue-600 hover:text-blue-800 mr-2" onclick="editProduct('${product.id}')">
+                            <i class="fas fa-edit"></i> 編輯
+                        </button>
+                        <button type="button" class="text-red-600 hover:text-red-800" onclick="confirmDeleteProduct('${product.id}', '${product.name}')">
+                            <i class="fas fa-trash-alt"></i> 刪除
+                        </button>
+                    </td>
+                `;
+            });
+        }
+
+        // Populate form for editing
+        window.editProduct = async function(id) {
+            try {
+                const docRef = doc(db, `artifacts/${appId}/public/data/coffeeProducts`, id);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const product = docSnap.data();
+                    currentEditingProductId = id; // Set current editing ID
+
+                    document.getElementById('product-id').value = id;
+                    document.getElementById('name').value = product.name || '';
+                    document.getElementById('country').value = product.country || '';
+                    document.getElementById('variety').value = product.variety || '';
+                    document.getElementById('processing').value = product.processing || '';
+                    document.getElementById('altitude').value = product.altitude || '';
+                    document.getElementById('weight').value = product.weight || '';
+                    document.getElementById('roast').value = product.roast || '';
+                    document.getElementById('expiry').value = product.expiry || '';
+                    document.getElementById('price').value = product.price !== undefined ? product.price : '';
+                    document.getElementById('stock').value = product.stock !== undefined ? product.stock : '';
+                    document.getElementById('flavor').value = product.flavor || '';
+                    document.getElementById('image').value = product.image || '';
+                    document.getElementById('farm_or_station').value = product.farm_or_station || '';
+                    document.getElementById('lifestyle').value = product.lifestyle || '';
+
+                    // Populate radar chart profile
+                    const profile = product.profile || [50, 50, 50, 50, 50];
+                    document.getElementById('profile-bitter').value = profile[0];
+                    document.getElementById('profile-acidity').value = profile[1];
+                    document.getElementById('profile-body').value = profile[2];
+                    document.getElementById('profile-floral').value = profile[3];
+                    document.getElementById('profile-nutty').value = profile[4];
+
+                    document.getElementById('save-product-btn').textContent = '更新品項';
+                    document.getElementById('save-product-btn').classList.remove('btn-primary');
+                    document.getElementById('save-product-btn').classList.add('bg-blue-600', 'hover:bg-blue-700'); // Use a different color for update
+                    showAdminMessageModal('編輯品項', `您正在編輯 ${product.name}。`, 'info');
+                    window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top to see the form
+                } else {
+                    showAdminMessageModal('錯誤', '找不到該品項。', 'error');
+                }
+            } catch (error) {
+                console.error("Error editing product:", error);
+                showAdminMessageModal('編輯錯誤', `載入編輯資料失敗：${error.message}`, 'error');
+            }
+        };
+
+        // Clear form
+        function clearForm() {
+            document.getElementById('product-id').value = '';
+            document.getElementById('name').value = '';
+            document.getElementById('country').value = '';
+            document.getElementById('variety').value = '';
+            document.getElementById('processing').value = '';
+            document.getElementById('altitude').value = '';
+            document.getElementById('weight').value = '';
+            document.getElementById('roast').value = '';
+            document.getElementById('expiry').value = '';
+            document.getElementById('price').value = '';
+            document.getElementById('stock').value = '';
+            document.getElementById('flavor').value = '';
+            document.getElementById('image').value = '';
+            document.getElementById('farm_or_station').value = '';
+            document.getElementById('lifestyle').value = '';
+
+            document.getElementById('profile-bitter').value = 50;
+            document.getElementById('profile-acidity').value = 50;
+            document.getElementById('profile-body').value = 50;
+            document.getElementById('profile-floral').value = 50;
+            document.getElementById('profile-nutty').value = 50;
+
+            currentEditingProductId = null; // Reset editing ID
+            document.getElementById('save-product-btn').textContent = '新增/更新品項';
+            document.getElementById('save-product-btn').classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            document.getElementById('save-product-btn').classList.add('btn-primary');
+            showAdminMessageModal('表單已清除', '您可以開始新增或選擇編輯品項。', 'info');
+        }
+
+        // Confirm delete
+        window.confirmDeleteProduct = function(id, name) {
+            showAdminMessageModal(
+                '確認刪除',
+                `您確定要刪除品項：<strong>${name}</strong> 嗎？此操作無法復原。`,
+                'error',
+                () => deleteProduct(id)
+            );
+        };
+
+        // Delete product
+        async function deleteProduct(id) {
+            try {
+                await deleteDoc(doc(db, `artifacts/${appId}/public/data/coffeeProducts`, id));
+                showAdminMessageModal('刪除成功', '品項已成功刪除！', 'success');
+                clearForm(); // Clear form after deletion
+            } catch (error) {
+                console.error("Error deleting product:", error);
+                showAdminMessageModal('刪除失敗', `刪除品項失敗：${error.message}`, 'error');
+            }
+        }
+
+        // Handle form submission (Add/Update)
+        document.getElementById('product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const productData = {
+                name: document.getElementById('name').value,
+                country: document.getElementById('country').value,
+                variety: document.getElementById('variety').value,
+                processing: document.getElementById('processing').value,
+                altitude: document.getElementById('altitude').value,
+                weight: document.getElementById('weight').value,
+                roast: document.getElementById('roast').value,
+                expiry: document.getElementById('expiry').value,
+                price: parseFloat(document.getElementById('price').value),
+                stock: parseInt(document.getElementById('stock').value),
+                flavor: document.getElementById('flavor').value,
+                image: document.getElementById('image').value,
+                farm_or_station: document.getElementById('farm_or_station').value,
+                lifestyle: document.getElementById('lifestyle').value,
+                profile: [
+                    parseInt(document.getElementById('profile-bitter').value),
+                    parseInt(document.getElementById('profile-acidity').value),
+                    parseInt(document.getElementById('profile-body').value),
+                    parseInt(document.getElementById('profile-floral').value),
+                    parseInt(document.getElementById('profile-nutty').value)
+                ]
+            };
+
+            // Basic validation
+            if (!productData.name || !productData.country || !productData.weight || !productData.roast || !productData.expiry || isNaN(productData.price) || isNaN(productData.stock) || !productData.flavor) {
+                showAdminMessageModal('輸入錯誤', '請填寫所有標記 <span class="text-red-500">*</span> 的必填欄位，並確保價格和庫存為有效數字。', 'error');
+                return;
+            }
+
+            try {
+                if (currentEditingProductId) {
+                    // Update existing product
+                    const docRef = doc(db, `artifacts/${appId}/public/data/coffeeProducts`, currentEditingProductId);
+                    await updateDoc(docRef, productData);
+                    showAdminMessageModal('更新成功', `${productData.name} 已成功更新！`, 'success');
+                } else {
+                    // Add new product
+                    await addDoc(productsCollectionRef, productData);
+                    showAdminMessageModal('新增成功', `${productData.name} 已成功新增！`, 'success');
+                }
+                clearForm(); // Clear form after successful operation
+            } catch (error) {
+                console.error("Error saving product:", error);
+                showAdminMessageModal('操作失敗', `儲存品項失敗：${error.message}`, 'error');
+            }
+        });
+
+        // Event listener for Clear Form button
+        document.getElementById('clear-form-btn').addEventListener('click', clearForm);
+
+        // Initialize Firebase on DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', initializeFirebase);
     </script>
 </body>
 </html>
