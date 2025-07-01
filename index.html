@@ -387,6 +387,17 @@
         // Initialize Firebase
         async function initializeFirebase() {
             try {
+                // Check if firebaseConfig is valid and contains projectId
+                if (!firebaseConfig || !firebaseConfig.projectId) {
+                    showAdminMessageModal(
+                        '初始化錯誤',
+                        'Firebase 設定無效或缺少 "projectId"。請確保您的 Canvas 環境已正確配置 Firebase 專案設定。',
+                        'error'
+                    );
+                    console.error("Firebase initialization failed: 'projectId' not provided in firebaseConfig.");
+                    return; // Stop initialization if config is invalid
+                }
+
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
