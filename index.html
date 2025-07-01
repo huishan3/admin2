@@ -304,7 +304,6 @@
                         </tr>
                     </thead>
                     <tbody id="products-table-body">
-                        <!-- Products will be loaded here by JavaScript -->
                         <tr><td colspan="7" class="text-center py-4 text-gray-500">載入品項中...</td></tr>
                     </tbody>
                 </table>
@@ -318,7 +317,6 @@
         </div>
     </footer>
 
-    <!-- Custom Message Modal -->
     <div id="adminMessageModal" class="admin-modal">
         <div class="admin-modal-content">
             <span class="admin-modal-close-button" onclick="closeAdminMessageModal()">&times;</span>
@@ -329,22 +327,11 @@
         </div>
     </div>
 
-    <script type="module">
-        // Firebase SDK imports
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        let db;
-        let auth;
-        let productsCollectionRef;
-        let currentEditingProductId = null; // To store the ID of the product being edited
+    <script>
+        // Use a key for localStorage
+        const LOCAL_STORAGE_KEY = 'melodyBeanCoffeeProducts';
         let globalProductsData = []; // To store all products for easy lookup
-
-        // Global variables provided by the Canvas environment
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        let currentEditingProductId = null; // To store the ID of the product being edited
 
         // Function to show custom modal messages
         function showAdminMessageModal(title, message, type = 'info') {
@@ -382,105 +369,86 @@
         // Function to close the custom modal
         window.closeAdminMessageModal = function() {
             document.getElementById('adminMessageModal').classList.remove('active');
+            // Re-show default button if hidden by a confirmation modal
+            const modalContent = document.getElementById('adminMessageModal').querySelector('.admin-modal-content');
+            const defaultConfirmBtn = modalContent.querySelector('.btn-primary:not([class*="mt-4"])'); // Target default, not the custom ones
+            if (defaultConfirmBtn) {
+                defaultConfirmBtn.style.display = 'block';
+            }
+            // Remove any custom buttons added for confirmation
+            const customBtns = modalContent.querySelectorAll('.admin-modal-content > button');
+            customBtns.forEach(btn => {
+                if (btn.classList.contains('btn-danger') || btn.classList.contains('btn-secondary')) {
+                    btn.remove();
+                }
+            });
         };
 
-        // Initialize Firebase
-        async function initializeFirebase() {
-            try {
-                // Check if firebaseConfig is valid and contains projectId
-                if (!firebaseConfig || !firebaseConfig.projectId) {
-                    showAdminMessageModal(
-                        '初始化錯誤',
-                        'Firebase 設定無效或缺少 "projectId"。請確保您的 Canvas 環境已正確配置 Firebase 專案設定。',
-                        'error'
-                    );
-                    console.error("Firebase initialization failed: 'projectId' not provided in firebaseConfig.");
-                    return; // Stop initialization if config is invalid
-                }
-
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-
-                // Authenticate with custom token or anonymously
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                    console.log("[Firebase] Signed in with custom token.");
-                } else {
-                    await signInAnonymously(auth);
-                    console.log("[Firebase] Signed in anonymously.");
-                }
-
-                const userId = auth.currentUser?.uid || 'anonymous';
-                productsCollectionRef = collection(db, `artifacts/${appId}/public/data/coffeeProducts`);
-                console.log("[Firebase] Firestore initialized. App ID:", appId, "User ID:", userId);
-
-                // Listen for real-time updates to the products collection
-                listenToProducts();
-
-            } catch (error) {
-                console.error("Firebase initialization error:", error);
-                showAdminMessageModal('初始化錯誤', `Firebase 初始化失敗：${error.message}。請檢查您的 Firebase 設定。`, 'error');
-            }
+        // --- LocalStorage Functions ---
+        function saveProductsToLocalStorage() {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(globalProductsData));
+            console.log("[LocalStorage] Products saved.");
         }
 
-        // Listen for real-time updates to the products collection
-        function listenToProducts() {
-            if (!productsCollectionRef) {
-                console.error("productsCollectionRef is not initialized.");
+        function loadProductsFromLocalStorage() {
+            const storedProducts = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (storedProducts) {
+                globalProductsData = JSON.parse(storedProducts);
+                console.log("[LocalStorage] Products loaded:", globalProductsData.length);
+            } else {
+                globalProductsData = [];
+                console.log("[LocalStorage] No products found, starting empty.");
+            }
+            renderProductsTable(); // Render table after loading
+        }
+
+        // Generate a simple unique ID (for localStorage, not as robust as Firestore IDs)
+        function generateUniqueId() {
+            return '_' + Math.random().toString(36).substr(2, 9);
+        }
+        // --- End LocalStorage Functions ---
+
+        // Render the products table
+        function renderProductsTable() {
+            const productsTableBody = document.getElementById('products-table-body');
+            productsTableBody.innerHTML = ''; // Clear table
+
+            if (globalProductsData.length === 0) {
+                productsTableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500">目前沒有咖啡豆品項。</td></tr>';
                 return;
             }
-            const q = query(productsCollectionRef, orderBy('name')); // Order by name for consistent display
 
-            onSnapshot(q, (snapshot) => {
-                globalProductsData = []; // Clear previous data
-                const productsTableBody = document.getElementById('products-table-body');
-                productsTableBody.innerHTML = ''; // Clear table
-                if (snapshot.empty) {
-                    productsTableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500">目前沒有咖啡豆品項。</td></tr>';
-                    return;
-                }
-                snapshot.forEach((doc) => {
-                    const product = { id: doc.id, ...doc.data() };
-                    globalProductsData.push(product); // Store product data
-                    renderProductRow(product);
-                });
-                console.log("[Firestore] Products updated:", globalProductsData.length);
-            }, (error) => {
-                console.error("Error listening to products:", error);
-                showAdminMessageModal('資料載入錯誤', `無法載入咖啡豆資料：${error.message}`, 'error');
+            // Sort products by name for consistent display
+            const sortedProducts = [...globalProductsData].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+            sortedProducts.forEach((product) => {
+                const row = productsTableBody.insertRow();
+                row.id = `product-row-${product.id}`;
+                row.className = 'table-row';
+
+                const stockStatusClass = product.stock > 50 ? 'stock-in-stock' : (product.stock > 0 ? 'stock-low-stock' : 'stock-out-of-stock');
+                const stockStatusText = product.stock > 50 ? '充足' : (product.stock > 0 ? '緊張' : '售罄');
+
+                row.innerHTML = `
+                    <td class="py-3 px-4">${product.name || 'N/A'}</td>
+                    <td class="py-3 px-4">${product.country || 'N/A'}</td>
+                    <td class="py-3 px-4">${product.variety || 'N/A'}</td>
+                    <td class="py-3 px-4">${product.roast || 'N/A'}</td>
+                    <td class="py-3 px-4">NT$${product.price !== undefined ? product.price : 'N/A'}</td>
+                    <td class="py-3 px-4">
+                        ${product.stock !== undefined ? product.stock : 'N/A'} 
+                        <span class="stock-indicator ${stockStatusClass}">${stockStatusText}</span>
+                    </td>
+                    <td class="py-3 px-4 space-x-2">
+                        <button class="px-3 py-1 rounded-md bg-blue-500 text-white text-sm hover:bg-blue-600 edit-btn" data-id="${product.id}">編輯</button>
+                        <button class="px-3 py-1 rounded-md btn-danger text-sm hover:bg-red-600 delete-btn" data-id="${product.id}">刪除</button>
+                    </td>
+                `;
+
+                // Add event listeners for edit and delete buttons
+                row.querySelector('.edit-btn').addEventListener('click', () => editProduct(product.id));
+                row.querySelector('.delete-btn').addEventListener('click', () => deleteProduct(product.id));
             });
-        }
-
-        // Render a single product row in the table
-        function renderProductRow(product) {
-            const productsTableBody = document.getElementById('products-table-body');
-            const row = productsTableBody.insertRow();
-            row.id = `product-row-${product.id}`;
-            row.className = 'table-row';
-
-            const stockStatusClass = product.stock > 50 ? 'stock-in-stock' : (product.stock > 0 ? 'stock-low-stock' : 'stock-out-of-stock');
-            const stockStatusText = product.stock > 50 ? '充足' : (product.stock > 0 ? '緊張' : '售罄');
-
-            row.innerHTML = `
-                <td class="py-3 px-4">${product.name || 'N/A'}</td>
-                <td class="py-3 px-4">${product.country || 'N/A'}</td>
-                <td class="py-3 px-4">${product.variety || 'N/A'}</td>
-                <td class="py-3 px-4">${product.roast || 'N/A'}</td>
-                <td class="py-3 px-4">NT$${product.price !== undefined ? product.price : 'N/A'}</td>
-                <td class="py-3 px-4">
-                    ${product.stock !== undefined ? product.stock : 'N/A'} 
-                    <span class="stock-indicator ${stockStatusClass}">${stockStatusText}</span>
-                </td>
-                <td class="py-3 px-4 space-x-2">
-                    <button class="px-3 py-1 rounded-md bg-blue-500 text-white text-sm hover:bg-blue-600 edit-btn" data-id="${product.id}">編輯</button>
-                    <button class="px-3 py-1 rounded-md btn-danger text-sm hover:bg-red-600 delete-btn" data-id="${product.id}">刪除</button>
-                </td>
-            `;
-
-            // Add event listeners for edit and delete buttons
-            row.querySelector('.edit-btn').addEventListener('click', () => editProduct(product.id));
-            row.querySelector('.delete-btn').addEventListener('click', () => deleteProduct(product.id));
         }
 
         // Clear form fields
@@ -536,48 +504,43 @@
         }
 
         // Delete a product
-        async function deleteProduct(id) {
-            // Use custom modal for confirmation instead of window.confirm
+        function deleteProduct(id) {
             showAdminMessageModal('確認刪除', '您確定要刪除這個品項嗎？此操作無法復原。', 'info');
-            // Add a specific confirm button to the modal for deletion
+            
+            const modalContent = document.getElementById('adminMessageModal').querySelector('.admin-modal-content');
+            const defaultConfirmBtn = modalContent.querySelector('.btn-primary'); // Get the default confirm button
+            defaultConfirmBtn.style.display = 'none'; // Hide default button
+
             const confirmBtn = document.createElement('button');
             confirmBtn.textContent = '確認刪除';
             confirmBtn.className = 'px-6 py-2 rounded-md btn-danger mt-4 mr-2';
-            confirmBtn.onclick = async () => {
-                try {
-                    await deleteDoc(doc(db, `artifacts/${appId}/public/data/coffeeProducts`, id));
+            confirmBtn.onclick = () => {
+                const index = globalProductsData.findIndex(p => p.id === id);
+                if (index !== -1) {
+                    globalProductsData.splice(index, 1);
+                    saveProductsToLocalStorage(); // Save changes
+                    renderProductsTable(); // Re-render table
                     showAdminMessageModal('刪除成功', '品項已成功刪除！', 'success');
                     clearForm(); // Clear form after deletion
-                } catch (error) {
-                    console.error("Error deleting product:", error);
-                    showAdminMessageModal('刪除失敗', `刪除品項失敗：${error.message}`, 'error');
-                } finally {
-                    closeAdminMessageModal(); // Close the confirmation modal
+                } else {
+                    showAdminMessageModal('刪除失敗', '找不到要刪除的品項。', 'error');
                 }
+                closeAdminMessageModal(); // Close the confirmation modal
             };
 
             const cancelBtn = document.createElement('button');
             cancelBtn.textContent = '取消';
             cancelBtn.className = 'px-6 py-2 rounded-md btn-secondary mt-4';
             cancelBtn.onclick = () => closeAdminMessageModal();
-
-            const modalContent = document.getElementById('adminMessageModal').querySelector('.admin-modal-content');
-            const existingConfirmBtn = modalContent.querySelector('.btn-primary'); // Get the default confirm button
-            existingConfirmBtn.style.display = 'none'; // Hide default button
-
-            // Remove previous confirm/cancel buttons if any before adding new ones
-            const oldConfirmBtn = modalContent.querySelector('.btn-danger');
-            const oldCancelBtn = modalContent.querySelector('.btn-secondary');
-            if (oldConfirmBtn) oldConfirmBtn.remove();
-            if (oldCancelBtn) oldCancelBtn.remove();
             
             modalContent.appendChild(confirmBtn);
             modalContent.appendChild(cancelBtn);
         }
 
-        // Define sample products data (converted to 0-100 scale for storage in Firestore)
+        // Define sample products data (converted to 0-100 scale for storage)
         const sampleProducts = [
             {
+                id: 'p1', // Manually assign IDs for samples
                 name: "衣索比亞 GEISHA 水洗 (114g)",
                 country: "衣索比亞",
                 variety: "GEISHA",
@@ -594,6 +557,7 @@
                 profile: [20, 45, 30, 42.5, 25]
             },
             {
+                id: 'p2',
                 name: "衣索比亞 Heirloom 雙重厭氧水洗 (227g)",
                 country: "衣索比亞",
                 variety: "Heirloom",
@@ -610,6 +574,7 @@
                 profile: [15, 40, 35, 47.5, 30]
             },
             {
+                id: 'p3',
                 name: "衣索比亞 Heirloom 雙重厭氧水洗 (227g) - 批次2",
                 country: "衣索比亞",
                 variety: "Heirloom",
@@ -626,10 +591,11 @@
                 profile: [15, 40, 35, 47.5, 30]
             },
             {
+                id: 'p4',
                 name: "衣索比亞 GEISHA (227g)",
                 country: "衣索比亞",
                 variety: "GEISHA",
-                processing: "日曬", // Default processing added
+                processing: "日曬",
                 altitude: "N/A",
                 weight: "227克",
                 roast: "中淺焙",
@@ -642,6 +608,7 @@
                 profile: [25, 35, 37.5, 40, 32.5]
             },
             {
+                id: 'p5',
                 name: "衣索比亞 GEISHA 水洗 (227g) - 批次2",
                 country: "衣索比亞",
                 variety: "GEISHA",
@@ -658,10 +625,11 @@
                 profile: [25, 35, 37.5, 40, 32.5]
             },
             {
-                name: "衣索比亞 綜合批次 (227g)", // This was item 7 in the user's new list, but I'll name it for clarity.
+                id: 'p6',
+                name: "衣索比亞 綜合批次 (227g)",
                 country: "衣索比亞",
-                variety: "原生種", // Default variety added
-                processing: "日曬", // Default processing added
+                variety: "原生種",
+                processing: "日曬",
                 altitude: "N/A",
                 weight: "227克",
                 roast: "淺焙",
@@ -674,6 +642,7 @@
                 profile: [22.5, 42.5, 32.5, 45, 27.5]
             },
             {
+                id: 'p7',
                 name: "哥斯大黎加 Geisha 白蜜 (114g)",
                 country: "哥斯大黎加",
                 variety: "Geisha（藝妓）",
@@ -690,80 +659,49 @@
                 profile: [17.5, 47.5, 35, 45, 20]
             },
             {
+                id: 'p8',
                 name: "哥斯大黎加 Geisha 白蜜 (227g)",
                 country: "哥斯大黎加",
-                variety: "Geisha（藝妓）", // Default variety added
-                processing: "白蜜", // Default processing added
-                altitude: "N/A", // Default altitude added
+                variety: "Geisha（藝妓）",
+                processing: "白蜜",
+                altitude: "N/A",
                 weight: "227克",
                 roast: "淺焙",
                 expiry: "2025-08-15",
                 price: 1800,
                 stock: 100,
                 flavor: "百合花、野薑花、檸檬草、柑橘、紅色莓果、蜂蜜",
-                farm_or_station: "N/A", // Default farm_or_station added
+                farm_or_station: "N/A",
                 lifestyle: "適合特殊時刻，細細品味其優雅的花香與甜感，是品鑑級的享受。",
                 profile: [17.5, 47.5, 35, 45, 20]
             }
         ];
 
-        // Function to load all sample products into Firestore
-        async function loadSampleProducts() {
-            // Check if Firestore is initialized
-            if (!db) {
-                showAdminMessageModal('載入失敗', 'Firebase 尚未初始化。請稍候再試或重新整理頁面。', 'error');
-                return;
-            }
-
-            // Use custom modal for confirmation
-            showAdminMessageModal('確認載入預設品項', '這將會新增多個預設咖啡豆品項到您的資料庫中。您確定要繼續嗎？', 'info');
+        // Function to load all sample products into localStorage
+        function loadSampleProducts() {
+            showAdminMessageModal('確認載入預設品項', '這將會新增多個預設咖啡豆品項到您的瀏覽器儲存中。您確定要繼續嗎？<br><br><b>注意：此操作會覆蓋現有資料！</b>', 'info');
             
+            const modalContent = document.getElementById('adminMessageModal').querySelector('.admin-modal-content');
+            const defaultConfirmBtn = modalContent.querySelector('.btn-primary');
+            defaultConfirmBtn.style.display = 'none';
+
             const confirmBtn = document.createElement('button');
             confirmBtn.textContent = '確認載入';
             confirmBtn.className = 'px-6 py-2 rounded-md btn-primary mt-4 mr-2';
-            confirmBtn.onclick = async () => {
-                closeAdminMessageModal(); // Close confirmation modal immediately
-
-                let successCount = 0;
-                let errorCount = 0;
-                const results = [];
-
-                for (const product of sampleProducts) {
-                    try {
-                        const productData = {
-                            name: product.name,
-                            country: product.country,
-                            variety: product.variety,
-                            processing: product.processing,
-                            altitude: product.altitude,
-                            weight: product.weight,
-                            roast: product.roast,
-                            expiry: product.expiry,
-                            price: parseFloat(product.price),
-                            stock: parseInt(product.stock),
-                            flavor: product.flavor,
-                            farm_or_station: product.farm_or_station || 'N/A',
-                            lifestyle: product.lifestyle || 'N/A',
-                            // Store profile as 0-100 in Firestore
-                            profile: product.profile || [50, 50, 50, 50, 50] 
-                        };
-                        await addDoc(productsCollectionRef, productData);
-                        results.push(`<li>成功新增：${product.name}</li>`);
-                        successCount++;
-                    } catch (error) {
-                        results.push(`<li class="text-red-500">新增失敗：${product.name} (${error.message})</li>`);
-                        errorCount++;
-                        console.error(`Error adding sample product ${product.name}:`, error);
+            confirmBtn.onclick = () => {
+                globalProductsData = []; // Clear current data before adding samples
+                sampleProducts.forEach(sample => {
+                    const existingProductIndex = globalProductsData.findIndex(p => p.id === sample.id);
+                    if (existingProductIndex === -1) {
+                         // Assign a new unique ID if not already assigned (important for non-Firestore)
+                        const productToAdd = { ...sample, id: sample.id || generateUniqueId() };
+                        globalProductsData.push(productToAdd);
                     }
-                }
-                showAdminMessageModal('載入完成', `成功新增 ${successCount} 個品項，失敗 ${errorCount} 個品項。<ul class="list-disc list-inside mt-2 text-left">${results.join('')}</ul>`, successCount > 0 ? 'success' : 'error');
-                // Restore default modal button
-                const modalContent = document.getElementById('adminMessageModal').querySelector('.admin-modal-content');
-                modalContent.querySelector('.btn-primary').style.display = 'block';
-                const oldConfirmBtn = modalContent.querySelector('.btn-primary.mt-4'); // This might be the new one, need to be careful
-                const oldCancelBtn = modalContent.querySelector('.btn-secondary.mt-4');
-                if (oldConfirmBtn) oldConfirmBtn.remove();
-                if (oldCancelBtn) oldCancelBtn.remove();
+                });
+                saveProductsToLocalStorage();
+                renderProductsTable();
+                showAdminMessageModal('載入完成', `已成功載入 ${sampleProducts.length} 個預設品項！`, 'success');
+                closeAdminMessageModal();
             };
 
             const cancelBtn = document.createElement('button');
@@ -771,23 +709,12 @@
             cancelBtn.className = 'px-6 py-2 rounded-md btn-secondary mt-4';
             cancelBtn.onclick = () => closeAdminMessageModal();
 
-            const modalContent = document.getElementById('adminMessageModal').querySelector('.admin-modal-content');
-            const existingConfirmBtn = modalContent.querySelector('.btn-primary');
-            existingConfirmBtn.style.display = 'none';
-
-            // Remove previous confirm/cancel buttons if any before adding new ones
-            const oldConfirmBtn = modalContent.querySelector('.btn-primary.mt-4.mr-2'); // Specific class to target the added one
-            const oldCancelBtn = modalContent.querySelector('.btn-secondary.mt-4');
-            if (oldConfirmBtn) oldConfirmBtn.remove();
-            if (oldCancelBtn) oldCancelBtn.remove();
-
             modalContent.appendChild(confirmBtn);
             modalContent.appendChild(cancelBtn);
         }
 
-
         // Event listener for form submission (Add/Update Product)
-        document.getElementById('product-form').addEventListener('submit', async (e) => {
+        document.getElementById('product-form').addEventListener('submit', (e) => {
             e.preventDefault();
 
             // Basic validation for required fields
@@ -821,7 +748,7 @@
                 flavor: flavor,
                 farm_or_station: document.getElementById('farm_or_station').value || 'N/A', // Default if empty
                 lifestyle: document.getElementById('lifestyle').value || 'N/A', // Default if empty
-                // Convert profile values from 0-5 to 0-100 for storage in Firestore
+                // Convert profile values from 0-5 to 0-100 for storage
                 profile: [
                     parseFloat(document.getElementById('profile-bitter').value) * 20,
                     parseFloat(document.getElementById('profile-acidity').value) * 20,
@@ -831,22 +758,25 @@
                 ]
             };
 
-            try {
-                if (currentEditingProductId) {
-                    // Update existing product
-                    const docRef = doc(db, `artifacts/${appId}/public/data/coffeeProducts`, currentEditingProductId);
-                    await updateDoc(docRef, productData);
+            if (currentEditingProductId) {
+                // Update existing product
+                const index = globalProductsData.findIndex(p => p.id === currentEditingProductId);
+                if (index !== -1) {
+                    globalProductsData[index] = { ...globalProductsData[index], ...productData };
                     showAdminMessageModal('更新成功', `${productData.name} 已成功更新！`, 'success');
                 } else {
-                    // Add new product
-                    await addDoc(productsCollectionRef, productData);
-                    showAdminMessageModal('新增成功', `${productData.name} 已成功新增！`, 'success');
+                    showAdminMessageModal('操作失敗', '更新品項失敗：找不到該品項。', 'error');
                 }
-                clearForm(); // Clear form after successful operation
-            } catch (error) {
-                console.error("Error saving product:", error);
-                showAdminMessageModal('操作失敗', `儲存品項失敗：${error.message}`, 'error');
+            } else {
+                // Add new product
+                productData.id = generateUniqueId(); // Assign a new unique ID
+                globalProductsData.push(productData);
+                showAdminMessageModal('新增成功', `${productData.name} 已成功新增！`, 'success');
             }
+            
+            saveProductsToLocalStorage(); // Save changes
+            renderProductsTable(); // Re-render table
+            clearForm(); // Clear form after successful operation
         });
 
         // Event listener for Clear Form button
@@ -855,8 +785,8 @@
         // Event listener for Load Sample Products button
         document.getElementById('load-sample-products-btn').addEventListener('click', loadSampleProducts);
 
-        // Initialize Firebase on DOMContentLoaded
-        document.addEventListener('DOMContentLoaded', initializeFirebase);
+        // Load products on DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', loadProductsFromLocalStorage);
     </script>
 </body>
 </html>
