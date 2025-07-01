@@ -698,6 +698,12 @@
 
         // Function to load all sample products into Firestore
         async function loadSampleProducts() {
+            // Check if Firestore is initialized
+            if (!db) {
+                showAdminMessageModal('載入失敗', 'Firebase 尚未初始化。請稍候再試或重新整理頁面。', 'error');
+                return;
+            }
+
             // Use custom modal for confirmation
             showAdminMessageModal('確認載入預設品項', '這將會新增多個預設咖啡豆品項到您的資料庫中。您確定要繼續嗎？', 'info');
             
@@ -773,20 +779,37 @@
         document.getElementById('product-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            // Basic validation for required fields
+            const name = document.getElementById('name').value;
+            const country = document.getElementById('country').value;
+            const variety = document.getElementById('variety').value;
+            const processing = document.getElementById('processing').value;
+            const weight = document.getElementById('weight').value;
+            const roast = document.getElementById('roast').value;
+            const expiry = document.getElementById('expiry').value;
+            const price = parseFloat(document.getElementById('price').value);
+            const stock = parseInt(document.getElementById('stock').value);
+            const flavor = document.getElementById('flavor').value;
+
+            if (!name || !country || !variety || !processing || !weight || !roast || !expiry || isNaN(price) || isNaN(stock) || !flavor) {
+                showAdminMessageModal('輸入錯誤', '請填寫所有標記 <span class="text-red-500">*</span> 的必填欄位，並確保價格和庫存為有效數字。', 'error');
+                return;
+            }
+
             const productData = {
-                name: document.getElementById('name').value,
-                country: document.getElementById('country').value,
-                variety: document.getElementById('variety').value,
-                processing: document.getElementById('processing').value,
-                altitude: document.getElementById('altitude').value,
-                weight: document.getElementById('weight').value,
-                roast: document.getElementById('roast').value,
-                expiry: document.getElementById('expiry').value, //YYYY-MM-DD format
-                price: parseFloat(document.getElementById('price').value),
-                stock: parseInt(document.getElementById('stock').value),
-                flavor: document.getElementById('flavor').value,
-                farm_or_station: document.getElementById('farm_or_station').value,
-                lifestyle: document.getElementById('lifestyle').value,
+                name: name,
+                country: country,
+                variety: variety,
+                processing: processing,
+                altitude: document.getElementById('altitude').value || 'N/A', // Default if empty
+                weight: weight,
+                roast: roast,
+                expiry: expiry, //YYYY-MM-DD format
+                price: price,
+                stock: stock,
+                flavor: flavor,
+                farm_or_station: document.getElementById('farm_or_station').value || 'N/A', // Default if empty
+                lifestyle: document.getElementById('lifestyle').value || 'N/A', // Default if empty
                 // Convert profile values from 0-5 to 0-100 for storage in Firestore
                 profile: [
                     parseFloat(document.getElementById('profile-bitter').value) * 20,
@@ -796,13 +819,6 @@
                     parseFloat(document.getElementById('profile-nutty').value) * 20
                 ]
             };
-
-            // Basic validation
-            if (!productData.name || !productData.country || !productData.variety || !productData.processing ||
-                !productData.weight || !productData.roast || !productData.expiry || isNaN(productData.price) || isNaN(productData.stock) || !productData.flavor) {
-                showAdminMessageModal('輸入錯誤', '請填寫所有標記 <span class="text-red-500">*</span> 的必填欄位，並確保價格和庫存為有效數字。', 'error');
-                return;
-            }
 
             try {
                 if (currentEditingProductId) {
