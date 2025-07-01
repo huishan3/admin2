@@ -574,13 +574,13 @@
                 altitude: "N/A",
                 weight: "114克",
                 roast: "淺焙",
-                expiry: "2025-10-12", //YYYY-MM-DD format for date input
+                expiry: "2025-10-12",
                 price: 280,
                 stock: 100,
                 flavor: "接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬、百香果",
                 farm_or_station: "N/A",
                 lifestyle: "適合早晨提神，享受清新花果香，搭配輕食或獨自品味。",
-                profile: [20, 45, 30, 42.5, 25] // Converted from 0-5 to 0-100 for storage (e.g., 1 -> 20, 2.5 -> 50, 4.5 -> 90)
+                profile: [20, 45, 30, 42.5, 25]
             },
             {
                 name: "衣索比亞 Heirloom 雙重厭氧水洗 (227g)",
@@ -596,7 +596,7 @@
                 flavor: "茉莉、橙花、蜂蜜、水蜜桃",
                 farm_or_station: "N/A",
                 lifestyle: "適合午後放鬆，感受獨特發酵香氣與甜感，搭配甜點或閱讀。",
-                profile: [15, 40, 35, 47.5, 30] // Converted from 0-5 to 0-100 for storage
+                profile: [15, 40, 35, 47.5, 30]
             },
             {
                 name: "衣索比亞 Heirloom 雙重厭氧水洗 (227g) - 批次2",
@@ -612,13 +612,13 @@
                 flavor: "茉莉、橙花、蜂蜜、水蜜桃",
                 farm_or_station: "N/A",
                 lifestyle: "適合午後放鬆，感受獨特發酵香氣與甜感，搭配甜點或閱讀。",
-                profile: [15, 40, 35, 47.5, 30] // Converted from 0-5 to 0-100 for storage
+                profile: [15, 40, 35, 47.5, 30]
             },
             {
                 name: "衣索比亞 GEISHA (227g)",
                 country: "衣索比亞",
                 variety: "GEISHA",
-                processing: "日曬", // Added a default processing
+                processing: "日曬", // Default processing added
                 altitude: "N/A",
                 weight: "227克",
                 roast: "中淺焙",
@@ -628,7 +628,7 @@
                 flavor: "接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬",
                 farm_or_station: "N/A",
                 lifestyle: "適合日常品飲，風味平衡，可搭配多種餐點或單獨享用。",
-                profile: [25, 35, 37.5, 40, 32.5] // Converted from 0-5 to 0-100 for storage
+                profile: [25, 35, 37.5, 40, 32.5]
             },
             {
                 name: "衣索比亞 GEISHA 水洗 (227g) - 批次2",
@@ -644,13 +644,13 @@
                 flavor: "接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬",
                 farm_or_station: "N/A",
                 lifestyle: "適合日常品飲，風味平衡，可搭配多種餐點或單獨享用。",
-                profile: [25, 35, 37.5, 40, 32.5] // Converted from 0-5 to 0-100 for storage
+                profile: [25, 35, 37.5, 40, 32.5]
             },
-            { // Item 6 is missing from user input, skipping to 7
-                name: "衣索比亞 綜合批次 (227g)",
+            {
+                name: "衣索比亞 綜合批次 (227g)", // This was item 7 in the user's new list, but I'll name it for clarity.
                 country: "衣索比亞",
-                variety: "原生種", // Added a default variety
-                processing: "日曬", // Added a default processing
+                variety: "原生種", // Default variety added
+                processing: "日曬", // Default processing added
                 altitude: "N/A",
                 weight: "227克",
                 roast: "淺焙",
@@ -660,7 +660,7 @@
                 flavor: "接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬",
                 farm_or_station: "N/A",
                 lifestyle: "適合探索多樣風味，體驗衣索比亞咖啡的豐富層次。",
-                profile: [22.5, 42.5, 32.5, 45, 27.5] // Converted from 0-5 to 0-100 for storage
+                profile: [22.5, 42.5, 32.5, 45, 27.5]
             },
             {
                 name: "哥斯大黎加 Geisha 白蜜 (114g)",
@@ -676,23 +676,23 @@
                 flavor: "百合花、野薑花、檸檬草、柑橘、紅色莓果、蜂蜜",
                 farm_or_station: "聖伊西多羅",
                 lifestyle: "適合特殊時刻，細細品味其優雅的花香與甜感，是品鑑級的享受。",
-                profile: [17.5, 47.5, 35, 45, 20] // Converted from 0-5 to 0-100 for storage
+                profile: [17.5, 47.5, 35, 45, 20]
             },
             {
                 name: "哥斯大黎加 Geisha 白蜜 (227g)",
                 country: "哥斯大黎加",
-                variety: "Geisha（藝妓）",
-                processing: "白蜜",
-                altitude: "1950公尺",
+                variety: "Geisha（藝妓）", // Default variety added
+                processing: "白蜜", // Default processing added
+                altitude: "N/A", // Default altitude added
                 weight: "227克",
                 roast: "淺焙",
                 expiry: "2025-08-15",
                 price: 1800,
                 stock: 100,
                 flavor: "百合花、野薑花、檸檬草、柑橘、紅色莓果、蜂蜜",
-                farm_or_station: "聖伊西多羅",
+                farm_or_station: "N/A", // Default farm_or_station added
                 lifestyle: "適合特殊時刻，細細品味其優雅的花香與甜感，是品鑑級的享受。",
-                profile: [17.5, 47.5, 35, 45, 20] // Converted from 0-5 to 0-100 for storage
+                profile: [17.5, 47.5, 35, 45, 20]
             }
         ];
 
