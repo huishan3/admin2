@@ -838,7 +838,7 @@
                     console.error("[Firebase Auth] Sign-in failed:", error);
                     let errorMessage = `無法登入 Firebase：${error.message}`;
                     if (error.code === 'auth/configuration-not-found') {
-                        errorMessage += '<br><br><b>解決方案：</b>請確認您的 Firebase 專案已啟用「匿名」身份驗證提供者。您可以在 Firebase 控制台的「Authentication」->「Sign-in method」中找到並啟用它。';
+                        errorMessage += '<br><br><b>解決方案：</b>請確認您的 Firebase 專案已啟用「匿名」和「自訂」兩種身份驗證提供者。您可以在 Firebase 控制台的「Authentication」->「Sign-in method」中找到並啟用它們。';
                     } else if (error.code === 'auth/invalid-api-key') {
                         errorMessage += '<br><br><b>解決方案：</b>請確認您在 HTML 檔案中提供的 Firebase API Key 是正確且有效的。';
                     } else if (error.code === 'auth/network-request-failed') {
