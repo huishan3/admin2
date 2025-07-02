@@ -4,16 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Melody Bean | 後台管理</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
     <style>
+        /* Define CSS Variables for consistent theming */
         :root {
             --color-bg: #fdfaf5; /* 溫暖米白 */
             --color-surface: #ffffff;
             --color-primary: #b58863; /* 柔和木質棕 */
             --color-secondary: #3f2e2e; /* 深咖啡文字 */
             --color-accent: #6b8e23; /* 橄欖綠 */
+            --color-highlight: #fce5d8; /* 新增活潑亮點色：淺珊瑚或淺桃色 */
         }
         body {
             font-family: 'Noto Sans TC', sans-serif;
@@ -21,141 +25,117 @@
             color: var(--color-secondary);
             background-image: url('https://www.transparenttextures.com/patterns/wood-pattern.png');
             background-attachment: fixed;
-            min-height: 100vh;
+            overflow-x: hidden;
+            min-height: 100vh; /* Ensure body takes full viewport height */
             display: flex;
             flex-direction: column;
         }
-        /* 主內容區塊的最小高度，確保頁腳在底部 */
-        main {
-            flex-grow: 1;
+        h1, h2, h3, h4, .font-serif {
+            font-family: 'Playfair Display', serif;
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: white;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .btn-primary:hover {
+            background-color: #a07654;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+        }
+        .btn-secondary {
+            background-color: var(--color-secondary);
+            color: white;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .btn-secondary:hover {
+            background-color: #5a4444;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0,0,0,0.15);
         }
         .card {
             background-color: var(--color-surface);
             border-radius: 0.75rem;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            padding: 1.5rem;
         }
-        .btn-primary {
-            background-color: var(--color-primary);
-            color: white;
-            transition: background-color 0.3s ease;
-        }
-        .btn-primary:hover {
-            background-color: #a07654;
-        }
-        .btn-secondary {
-            background-color: #e0e0e0;
-            color: var(--color-secondary);
-            transition: background-color 0.3s ease;
-        }
-        .btn-secondary:hover {
-            background-color: #cccccc;
-        }
-        .btn-danger {
-            background-color: #ef4444;
-            color: white;
-            transition: background-color 0.3s ease;
-        }
-        .btn-danger:hover {
-            background-color: #dc2626;
-        }
-        .table-header {
-            background-color: var(--color-primary);
-            color: white;
-        }
-        .table-row:nth-child(odd) {
-            background-color: #f9f9f9;
-        }
-        .table-row:hover {
-            background-color: #f0f0f0;
-        }
-        input[type="text"],
-        input[type="number"],
-        input[type="date"],
-        textarea,
-        select {
-            border: 1px solid #d1d5db;
-            border-radius: 0.375rem;
-            padding: 0.75rem;
-            width: 100%;
-            box-sizing: border-box;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        input[type="text"]:focus,
-        input[type="number"]:focus,
-        input[type="date"]:focus,
-        textarea:focus,
-        select:focus {
-            border-color: var(--color-primary);
-            box-shadow: 0 0 0 2px rgba(181, 136, 99, 0.2);
-            outline: none;
-        }
-        /* Custom Modal Styles */
-        .admin-modal {
-            display: flex; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1000; /* Sit on top */
+        .front-modal {
+            display: flex;
+            position: fixed;
+            z-index: 1000;
             left: 0;
             top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
             justify-content: center;
             align-items: center;
+            transition: opacity 0.3s ease-out;
             opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+            pointer-events: none;
         }
-        .admin-modal.active {
+        .front-modal.active {
             opacity: 1;
-            visibility: visible;
+            pointer-events: auto;
         }
-        .admin-modal-content {
+        .front-modal-content {
             background-color: var(--color-surface);
-            margin: auto;
-            padding: 2rem;
-            border-radius: 0.75rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            max-width: 450px;
             width: 90%;
-            max-width: 500px;
             text-align: center;
             position: relative;
-            transform: translateY(-20px);
-            transition: transform 0.3s ease;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+            display: flex;
+            flex-direction: column;
         }
-        .admin-modal.active .admin-modal-content {
-            transform: translateY(0);
+        .front-modal.active .front-modal-content {
+            transform: scale(1);
+            opacity: 1;
         }
-        .admin-modal-close-button {
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
+        .front-modal-close-button {
+            color: #888;
+            font-size: 24px;
             position: absolute;
-            top: 10px;
-            right: 15px;
+            top: 15px;
+            right: 18px;
             cursor: pointer;
+            transition: color 0.2s;
         }
-        .admin-modal-close-button:hover,
-        .admin-modal-close-button:focus {
-            color: #000;
-            text-decoration: none;
-            cursor: pointer;
+        .front-modal-close-button:hover,
+        .front-modal-close-button:focus {
+            color: var(--color-secondary);
         }
-        .modal-icon {
-            font-size: 3rem;
+        #frontModalIcon {
+            font-size: 4rem;
             margin-bottom: 1rem;
+            line-height: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 4rem;
         }
         .icon-success { color: var(--color-accent); }
         .icon-error { color: #ef4444; }
         .icon-info { color: var(--color-primary); }
-
-        /* Stock indicator style */
+        .front-modal-success { color: var(--color-accent); }
+        .front-modal-error { color: #ef4444; }
+        .front-modal-info { color: var(--color-primary); }
+        #frontModalMessage {
+            max-height: 40vh;
+            overflow-y: auto;
+            padding-right: 15px;
+            margin-bottom: 1rem;
+            flex-grow: 1;
+            text-align: left;
+            padding-left: 5px;
+        }
         .stock-indicator {
             font-weight: bold;
             padding: 0.25rem 0.5rem;
@@ -163,684 +143,721 @@
             font-size: 0.85em;
         }
         .stock-in-stock {
-            background-color: #d1fae5; /* Green-100 */
-            color: #065f46; /* Green-800 */
+            background-color: #d1fae5;
+            color: #065f46;
         }
         .stock-low-stock {
-            background-color: #fef3c7; /* Yellow-100 */
-            color: #92400e; /* Yellow-800 */
+            background-color: #fef3c7;
+            color: #92400e;
         }
         .stock-out-of-stock {
-            background-color: #fee2e2; /* Red-100 */
-            color: #991b1b; /* Red-800 */
+            background-color: #fee2e2;
+            color: #991b1b;
         }
     </style>
 </head>
 <body>
-    <header class="bg-primary text-white p-4 shadow-md">
-        <div class="container flex justify-between items-center">
-            <h1 class="text-3xl font-bold">Melody Bean 後台管理</h1>
-            <nav>
-                <a href="展示.html" class="text-white hover:underline">返回前台</a>
-            </nav>
+    <nav class="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto flex justify-between items-center p-4">
+            <a href="index.html" class="text-3xl font-serif text-secondary">Melody Bean</a>
+            <div class="flex items-center space-x-4">
+                <a href="index.html" class="px-4 py-2 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors">回前台</a>
+                <button id="admin-login-btn" class="px-4 py-2 rounded-full bg-gray-700 text-white hover:bg-gray-800 transition-colors">登入後台</button>
+                <button id="admin-logout-btn" class="px-4 py-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors hidden">登出後台</button>
+            </div>
         </div>
-    </header>
+    </nav>
 
-    <main class="container py-8">
-        <section class="mb-8">
-            <h2 class="text-2xl font-semibold text-secondary mb-4">產品管理</h2>
-            <div class="card">
-                <form id="product-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="name" class="block text-sm font-medium text-gray-700">品項名稱 <span class="text-red-500">*</span></label>
-                        <input type="text" id="name" name="name" required>
-                    </div>
-                    <div>
-                        <label for="country" class="block text-sm font-medium text-gray-700">國家 <span class="text-red-500">*</span></label>
-                        <input type="text" id="country" name="country" required>
-                    </div>
-                    <div>
-                        <label for="variety" class="block text-sm font-medium text-gray-700">品種 <span class="text-red-500">*</span></label>
-                        <input type="text" id="variety" name="variety" required>
-                    </div>
-                    <div>
-                        <label for="processing" class="block text-sm font-medium text-gray-700">處理法 <span class="text-red-500">*</span></label>
-                        <input type="text" id="processing" name="processing" required>
-                    </div>
-                    <div>
-                        <label for="altitude" class="block text-sm font-medium text-gray-700">海拔 (公尺)</label>
-                        <input type="text" id="altitude" name="altitude">
-                    </div>
-                    <div>
-                        <label for="weight" class="block text-sm font-medium text-gray-700">重量 (克) <span class="text-red-500">*</span></label>
-                        <input type="text" id="weight" name="weight" required>
-                    </div>
-                    <div>
-                        <label for="roast" class="block text-sm font-medium text-gray-700">烘焙度 <span class="text-red-500">*</span></label>
-                        <select id="roast" name="roast" required>
-                            <option value="">請選擇</option>
-                            <option value="淺焙">淺焙</option>
-                            <option value="中淺焙">中淺焙</option>
-                            <option value="中焙">中焙</option>
-                            <option value="中深焙">中深焙</option>
-                            <option value="深焙">深焙</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="expiry" class="block text-sm font-medium text-gray-700">期限 <span class="text-red-500">*</span></label>
-                        <input type="date" id="expiry" name="expiry" required>
-                    </div>
-                    <div>
-                        <label for="price" class="block text-sm font-medium text-gray-700">售價 (NT$) <span class="text-red-500">*</span></label>
-                        <input type="number" id="price" name="price" required min="0" step="1">
-                    </div>
-                    <div>
-                        <label for="stock" class="block text-sm font-medium text-gray-700">庫存 <span class="text-red-500">*</span></label>
-                        <input type="number" id="stock" name="stock" required min="0" step="1">
-                    </div>
-                    <div class="md:col-span-2">
-                        <label for="flavor" class="block text-sm font-medium text-gray-700">風味描述 <span class="text-red-500">*</span></label>
-                        <textarea id="flavor" name="flavor" rows="3" required></textarea>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label for="farm_or_station" class="block text-sm font-medium text-gray-700">處理場/莊園</label>
-                        <input type="text" id="farm_or_station" name="farm_or_station">
-                    </div>
-                    <div class="md:col-span-2">
-                        <label for="lifestyle" class="block text-sm font-medium text-gray-700">生活提案</label>
-                        <textarea id="lifestyle" name="lifestyle" rows="3"></textarea>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">風味圖譜 (0-5)</label>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+    <main class="flex-grow">
+        <!-- Admin Panel Section -->
+        <section id="admin-panel" class="py-10 bg-gray-100 min-h-screen hidden">
+            <div class="max-w-6xl mx-auto px-6">
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-serif text-secondary mb-4">後台管理</h2>
+                    <p id="current-user-id" class="text-sm text-gray-600 mb-4">使用者 ID: 未登入</p>
+                </div>
+
+                <!-- Add/Edit Product Form -->
+                <div class="bg-white p-8 rounded-lg shadow-lg mb-12">
+                    <h3 id="add-edit-product-title" class="text-2xl font-serif text-primary mb-6">新增商品</h3>
+                    <form id="product-form" class="space-y-4">
+                        <input type="hidden" id="product-id"> <!-- Hidden input for product ID when editing -->
+                        <div>
+                            <label for="name-input" class="block text-sm font-medium text-gray-700">商品名稱 <span class="text-red-500">*</span></label>
+                            <input type="text" id="name-input" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2" required>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label for="profile-bitter" class="block text-xs font-medium text-gray-600">苦味</label>
-                                <input type="number" id="profile-bitter" name="profile-bitter" min="0" max="5" step="0.1" value="2.5">
+                                <label for="country-input" class="block text-sm font-medium text-gray-700">國家</label>
+                                <input type="text" id="country-input" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
                             </div>
                             <div>
-                                <label for="profile-acidity" class="block text-xs font-medium text-gray-600">酸度</label>
-                                <input type="number" id="profile-acidity" name="profile-acidity" min="0" max="5" step="0.1" value="2.5">
+                                <label for="variety-input" class="block text-sm font-medium text-gray-700">品種</label>
+                                <input type="text" id="variety-input" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
                             </div>
                             <div>
-                                <label for="profile-body" class="block text-xs font-medium text-gray-600">醇厚度</label>
-                                <input type="number" id="profile-body" name="profile-body" min="0" max="5" step="0.1" value="2.5">
+                                <label for="processing-input" class="block text-sm font-medium text-gray-700">處理法</label>
+                                <input type="text" id="processing-input" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
                             </div>
                             <div>
-                                <label for="profile-floral" class="block text-xs font-medium text-gray-600">花果香</label>
-                                <input type="number" id="profile-floral" name="profile-floral" min="0" max="5" step="0.1" value="2.5">
+                                <label for="altitude-input" class="block text-sm font-medium text-gray-700">海拔</label>
+                                <input type="text" id="altitude-input" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
                             </div>
                             <div>
-                                <label for="profile-nutty" class="block text-xs font-medium text-gray-600">堅果/巧克力</label>
-                                <input type="number" id="profile-nutty" name="profile-nutty" min="0" max="5" step="0.1" value="2.5">
+                                <label for="weight-input" class="block text-sm font-medium text-gray-700">重量</label>
+                                <input type="text" id="weight-input" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
+                            </div>
+                            <div>
+                                <label for="roast-input" class="block text-sm font-medium text-gray-700">烘焙度</label>
+                                <input type="text" id="roast-input" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
+                            </div>
+                            <div>
+                                <label for="expiry-input" class="block text-sm font-medium text-gray-700">期限 <span class="text-red-500">*</span></label>
+                                <input type="date" id="expiry-input" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2" required>
+                            </div>
+                            <div>
+                                <label for="price-input" class="block text-sm font-medium text-gray-700">售價 (NT$) <span class="text-red-500">*</span></label>
+                                <input type="number" id="price-input" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2" required min="0">
+                            </div>
+                            <div>
+                                <label for="stock-input" class="block text-sm font-medium text-gray-700">庫存 <span class="text-red-500">*</span></label>
+                                <input type="number" id="stock-input" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2" required min="0">
+                            </div>
+                            <div>
+                                <label for="image-input" class="block text-sm font-medium text-gray-700">圖片網址 (選填)</label>
+                                <input type="text" id="image-input" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2" placeholder="例如: image/your_bean.png 或外部 URL">
+                            </div>
+                            <div>
+                                <label for="farm-input" class="block text-sm font-medium text-gray-700">處理場/莊園 (選填)</label>
+                                <input type="text" id="farm-input" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
+                            </div>
+                            <!-- Flavor Profile inputs for radar chart -->
+                            <div class="col-span-full grid grid-cols-1 md:grid-cols-5 gap-4">
+                                <label class="col-span-full block text-sm font-medium text-gray-700">風味圖譜 (0-100，預設50)</label>
+                                <div><label>苦味:</label><input type="number" id="profile-bitterness" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2" min="0" max="100" value="50"></div>
+                                <div><label>酸度:</label><input type="number" id="profile-acidity" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2" min="0" max="100" value="50"></div>
+                                <div><label>醇厚度:</label><input type="number" id="profile-body" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2" min="0" max="100" value="50"></div>
+                                <div><label>花果香:</label><input type="number" id="profile-floral" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2" min="0" max="100" value="50"></div>
+                                <div><label>堅果/巧克力:</label><input type="number" id="profile-nutty" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2" min="0" max="100" value="50"></div>
+                            </div>
+                            <div class="col-span-full">
+                                <label for="flavor-input" class="block text-sm font-medium text-gray-700">風味描述 <span class="text-red-500">*</span></label>
+                                <textarea id="flavor-input" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2" required></textarea>
+                            </div>
+                            <div class="col-span-full">
+                                <label for="lifestyle-input" class="block text-sm font-medium text-gray-700">生活提案 (選填)</label>
+                                <textarea id="lifestyle-input" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2"></textarea>
                             </div>
                         </div>
-                    </div>
-                    <div class="md:col-span-2 flex justify-end space-x-4 mt-4">
-                        <button type="submit" id="save-product-btn" class="px-6 py-3 rounded-md btn-primary">新增/更新品項</button>
-                        <button type="button" id="clear-form-btn" class="px-6 py-3 rounded-md btn-secondary">清除表單</button>
-                    </div>
-                </form>
-                <div class="md:col-span-2 flex justify-center mt-6">
-                    <button type="button" id="load-sample-products-btn" class="px-6 py-3 rounded-md bg-green-600 text-white hover:bg-green-700 transition-colors">
-                        <i class="fas fa-seedling mr-2"></i> 載入預設咖啡豆品項
-                    </button>
+                        <div class="flex space-x-4">
+                            <button type="submit" id="submit-add-edit-btn" class="btn-primary flex-grow py-2 rounded-md">新增商品</button>
+                            <button type="button" id="reset-form-btn" class="btn-secondary flex-grow py-2 rounded-md">清空表單</button>
+                        </div>
+                    </form>
                 </div>
-            </div>
-        </section>
 
-        <section>
-            <h2 class="text-2xl font-semibold text-secondary mb-4">現有品項列表</h2>
-            <div class="card overflow-x-auto">
-                <table class="min-w-full bg-white">
-                    <thead>
-                        <tr>
-                            <th class="py-3 px-4 text-left table-header rounded-tl-lg">品項名稱</th>
-                            <th class="py-3 px-4 text-left table-header">國家</th>
-                            <th class="py-3 px-4 text-left table-header">品種</th>
-                            <th class="py-3 px-4 text-left table-header">烘焙度</th>
-                            <th class="py-3 px-4 text-left table-header">售價</th>
-                            <th class="py-3 px-4 text-left table-header">庫存</th>
-                            <th class="py-3 px-4 text-left table-header rounded-tr-lg">操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="products-table-body">
-                        <tr><td colspan="7" class="text-center py-4 text-gray-500">載入品項中...</td></tr>
-                    </tbody>
-                </table>
+                <!-- Product List -->
+                <div class="bg-white p-8 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-serif text-secondary mb-6">現有咖啡豆品項</h3>
+                    <div id="admin-product-list">
+                        <p class="text-gray-500 text-center">載入商品中...</p>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
 
     <footer class="bg-secondary text-white py-4 mt-8">
-        <div class="container text-center text-gray-300">
-            <p>&copy; 2024 Melody Bean. All rights reserved.</p>
+        <div class="max-w-6xl mx-auto px-6 text-center text-gray-300">
+            <p>&copy; 2024 Melody Bean Admin. All rights reserved.</p>
         </div>
     </footer>
 
-    <div id="adminMessageModal" class="admin-modal">
-        <div class="admin-modal-content">
-            <span class="admin-modal-close-button" onclick="closeAdminMessageModal()">&times;</span>
-            <div id="modalIcon" class="modal-icon"></div>
-            <h3 id="modalTitle" class="text-2xl font-semibold mb-4"></h3>
-            <p id="modalMessage" class="text-gray-700 mb-6"></p>
-            <button onclick="closeAdminMessageModal()" class="px-6 py-2 rounded-md btn-primary">確認</button>
+    <!-- 自定義訊息彈窗 -->
+    <div id="frontMessageModal" class="front-modal">
+        <div class="front-modal-content">
+            <span class="front-modal-close-button" onclick="closeFrontMessageModal()">&times;</span>
+            <div id="frontModalIcon"></div>
+            <h3 id="frontModalTitle" class="text-2xl font-serif mb-4"></h3>
+            <p id="frontModalMessage" class="text-gray-700 mb-4"></p>
+            <button onclick="closeFrontMessageModal()" class="btn-primary px-6 py-2 rounded-full mx-auto">確認</button>
         </div>
     </div>
 
+    <!-- Firebase SDKs -->
     <script type="module">
-        // Firebase SDK imports
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js"; // Updated SDK version
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js"; // Updated SDK version
-        import { getFirestore, collection, query, onSnapshot, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js"; // Updated SDK version
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, query, orderBy, onSnapshot, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Configuration (from user's prompt)
-        const firebaseConfig = {
-            apiKey: "AIzaSyCMO_9eufgKuEoJ5Kob5W4SuDikaX-Drqg",
-            authDomain: "product-display-system.firebaseapp.com",
-            projectId: "product-display-system",
-            storageBucket: "product-display-system.firebasestorage.app",
-            messagingSenderId: "253942464889",
-            appId: "1:253942464889:web:1cd581c08faf962ea4efa8",
-            measurementId: "G-NTG56CZC9N"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-
-        // Debugging: Log Firebase config to console
-        console.log("[Firebase Config]", firebaseConfig);
-
-        // Global Variables for Firebase and Products
-        let globalProductsData = []; // To store all products for easy lookup
-        let currentEditingProductId = null; // To store the ID of the product being edited
-        let isAuthReady = false; // Flag to ensure auth is ready before fetching Firestore data
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'; // Canvas provided app ID
-        const productsCollectionRef = collection(db, `artifacts/${appId}/public/data/coffeeProducts`);
+        // Global Firebase variables
+        let firebaseApp = null;
+        let db = null;
+        let auth = null;
+        let productsCollectionRef = null;
+        let currentUserId = null;
+        let products = []; // Array to hold products from Firestore
 
         // Function to show custom modal messages
-        function showAdminMessageModal(title, message, type = 'info') {
-            const modal = document.getElementById('adminMessageModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalMessage = document.getElementById('modalMessage');
-            const modalIcon = document.getElementById('modalIcon');
+        // Moved to global scope
+        window.showFrontMessageModal = function(title, message, type = 'info') {
+            const modal = document.getElementById('frontMessageModal');
+            const modalTitle = document.getElementById('frontModalTitle');
+            const modalMessage = document.getElementById('frontModalMessage');
+            const modalIcon = document.getElementById('frontModalIcon');
 
-            // Reset classes
-            modalTitle.className = 'text-2xl font-semibold mb-4';
-            modalIcon.className = 'modal-icon';
+            modalTitle.className = 'text-2xl font-serif mb-4';
+            modalIcon.className = '';
 
             modalTitle.textContent = title;
-            modalMessage.innerHTML = message; // Use innerHTML to allow for basic HTML tags if needed
+            modalMessage.innerHTML = message;
 
-            // Set icon and title color based on type
             switch (type) {
                 case 'success':
                     modalIcon.innerHTML = '<i class="fas fa-check-circle icon-success"></i>';
-                    modalTitle.style.color = 'var(--color-accent)'; // Green
+                    modalTitle.classList.add('front-modal-success');
                     break;
                 case 'error':
                     modalIcon.innerHTML = '<i class="fas fa-times-circle icon-error"></i>';
-                    modalTitle.style.color = '#ef4444'; // Red
+                    modalTitle.classList.add('front-modal-error');
                     break;
                 case 'info':
                 default:
                     modalIcon.innerHTML = '<i class="fas fa-info-circle icon-info"></i>';
-                    modalTitle.style.color = 'var(--color-primary)'; // Primary color
+                    modalTitle.classList.add('front-modal-info');
                     break;
             }
             modal.classList.add('active');
-        }
-
-        // Function to close the custom modal
-        window.closeAdminMessageModal = function() {
-            document.getElementById('adminMessageModal').classList.remove('active');
-            // Re-show default button if hidden by a confirmation modal
-            const modalContent = document.getElementById('adminMessageModal').querySelector('.admin-modal-content');
-            const defaultConfirmBtn = modalContent.querySelector('.btn-primary:not([class*="mt-4"])'); // Target default, not the custom ones
-            if (defaultConfirmBtn) {
-                defaultConfirmBtn.style.display = 'block';
-            }
-            // Remove any custom buttons added for confirmation
-            const customBtns = modalContent.querySelectorAll('.admin-modal-content > button');
-            customBtns.forEach(btn => {
-                if (btn.classList.contains('btn-danger') || btn.classList.contains('btn-secondary')) {
-                    btn.remove();
-                }
-            });
         };
 
-        // Render the products table from globalProductsData
-        function renderProductsTable() {
-            const productsTableBody = document.getElementById('products-table-body');
-            productsTableBody.innerHTML = ''; // Clear table
+        // Function to close custom modal messages
+        // Moved to global scope
+        window.closeFrontMessageModal = function() {
+            document.getElementById('frontMessageModal').classList.remove('active');
+        };
 
-            if (globalProductsData.length === 0) {
-                productsTableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500">目前沒有咖啡豆品項。</td></tr>';
-                return;
-            }
-
-            // Sort products by name for consistent display
-            const sortedProducts = [...globalProductsData].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-
-            sortedProducts.forEach((product) => {
-                const row = productsTableBody.insertRow();
-                row.id = `product-row-${product.id}`;
-                row.className = 'table-row';
-
-                const stockStatusClass = product.stock > 50 ? 'stock-in-stock' : (product.stock > 0 ? 'stock-low-stock' : 'stock-out-of-stock');
-                const stockStatusText = product.stock > 50 ? '充足' : (product.stock > 0 ? '緊張' : '售罄');
-
-                row.innerHTML = `
-                    <td class="py-3 px-4">${product.name || 'N/A'}</td>
-                    <td class="py-3 px-4">${product.country || 'N/A'}</td>
-                    <td class="py-3 px-4">${product.variety || 'N/A'}</td>
-                    <td class="py-3 px-4">${product.roast || 'N/A'}</td>
-                    <td class="py-3 px-4">NT$${product.price !== undefined ? product.price : 'N/A'}</td>
-                    <td class="py-3 px-4">
-                        ${product.stock !== undefined ? product.stock : 'N/A'} 
-                        <span class="stock-indicator ${stockStatusClass}">${stockStatusText}</span>
-                    </td>
-                    <td class="py-3 px-4 space-x-2">
-                        <button class="px-3 py-1 rounded-md bg-blue-500 text-white text-sm hover:bg-blue-600 edit-btn" data-id="${product.id}">編輯</button>
-                        <button class="px-3 py-1 rounded-md btn-danger text-sm hover:bg-red-600 delete-btn" data-id="${product.id}">刪除</button>
-                    </td>
-                `;
-
-                // Add event listeners for edit and delete buttons
-                row.querySelector('.edit-btn').addEventListener('click', () => editProduct(product.id));
-                row.querySelector('.delete-btn').addEventListener('click', () => deleteProduct(product.id));
-            });
-        }
-
-        // Clear form fields
-        function clearForm() {
-            document.getElementById('product-form').reset();
-            document.getElementById('save-product-btn').textContent = '新增品項';
-            currentEditingProductId = null;
-            // Reset flavor profile to default 2.5s (0-5 scale)
-            document.getElementById('profile-bitter').value = 2.5;
-            document.getElementById('profile-acidity').value = 2.5;
-            document.getElementById('profile-body').value = 2.5;
-            document.getElementById('profile-floral').value = 2.5;
-            document.getElementById('profile-nutty').value = 2.5;
-        }
-
-        // Populate form for editing
-        async function editProduct(id) {
-            if (!isAuthReady) {
-                showAdminMessageModal('認證中', '請稍候，正在驗證您的身份...', 'info');
-                return;
-            }
-            try {
-                const productDocRef = doc(db, `artifacts/${appId}/public/data/coffeeProducts`, id);
-                const productDocSnap = await getDoc(productDocRef);
-
-                if (productDocSnap.exists()) {
-                    const product = productDocSnap.data();
-                    document.getElementById('name').value = product.name || '';
-                    document.getElementById('country').value = product.country || '';
-                    document.getElementById('variety').value = product.variety || '';
-                    document.getElementById('processing').value = product.processing || '';
-                    document.getElementById('altitude').value = product.altitude || 'N/A';
-                    document.getElementById('weight').value = product.weight || '';
-                    document.getElementById('roast').value = product.roast || '';
-                    document.getElementById('expiry').value = product.expiry || ''; // Date input expects YYYY-MM-DD
-                    document.getElementById('price').value = product.price !== undefined ? product.price : '';
-                    document.getElementById('stock').value = product.stock !== undefined ? product.stock : '';
-                    document.getElementById('flavor').value = product.flavor || '';
-                    document.getElementById('farm_or_station').value = product.farm_or_station || 'N/A';
-                    document.getElementById('lifestyle').value = product.lifestyle || 'N/A';
-
-                    // Set flavor profile values (convert from 0-100 to 0-5 for display in the form)
-                    if (Array.isArray(product.profile) && product.profile.length === 5) {
-                        document.getElementById('profile-bitter').value = (product.profile[0] / 20).toFixed(1);
-                        document.getElementById('profile-acidity').value = (product.profile[1] / 20).toFixed(1);
-                        document.getElementById('profile-body').value = (product.profile[2] / 20).toFixed(1);
-                        document.getElementById('profile-floral').value = (product.profile[3] / 20).toFixed(1);
-                        document.getElementById('profile-nutty').value = (product.profile[4] / 20).toFixed(1);
-                    } else {
-                        // Reset to default if profile is missing or malformed
-                        document.getElementById('profile-bitter').value = 2.5;
-                        document.getElementById('profile-acidity').value = 2.5;
-                        document.getElementById('profile-body').value = 2.5;
-                        document.getElementById('profile-floral').value = 2.5;
-                        document.getElementById('profile-nutty').value = 2.5;
-                    }
-
-                    document.getElementById('save-product-btn').textContent = '更新品項';
-                    currentEditingProductId = id;
-                } else {
-                    showAdminMessageModal('錯誤', '找不到要編輯的品項。', 'error');
-                }
-            } catch (error) {
-                console.error("Error fetching product for edit:", error);
-                showAdminMessageModal('載入失敗', `載入品項進行編輯失敗：${error.message}`, 'error');
-            }
-        }
-
-        // Delete a product from Firestore
-        function deleteProduct(id) {
-            showAdminMessageModal('確認刪除', '您確定要刪除這個品項嗎？此操作無法復原。', 'info');
-            
-            const modalContent = document.getElementById('adminMessageModal').querySelector('.admin-modal-content');
-            const defaultConfirmBtn = modalContent.querySelector('.btn-primary'); // Get the default confirm button
-            defaultConfirmBtn.style.display = 'none'; // Hide default button
-
-            const confirmBtn = document.createElement('button');
-            confirmBtn.textContent = '確認刪除';
-            confirmBtn.className = 'px-6 py-2 rounded-md btn-danger mt-4 mr-2';
-            confirmBtn.onclick = async () => {
-                if (!isAuthReady) {
-                    showAdminMessageModal('認證中', '請稍候，正在驗證您的身份...', 'info');
-                    closeAdminMessageModal();
-                    return;
-                }
-                try {
-                    await deleteDoc(doc(db, `artifacts/${appId}/public/data/coffeeProducts`, id));
-                    showAdminMessageModal('刪除成功', '品項已成功刪除！', 'success');
-                    clearForm(); // Clear form after deletion
-                } catch (error) {
-                    console.error("Error deleting product:", error);
-                    showAdminMessageModal('刪除失敗', `刪除品項失敗：${error.message}`, 'error');
-                }
-                closeAdminMessageModal(); // Close the confirmation modal
-            };
-
-            const cancelBtn = document.createElement('button');
-            cancelBtn.textContent = '取消';
-            cancelBtn.className = 'px-6 py-2 rounded-md btn-secondary mt-4';
-            cancelBtn.onclick = () => closeAdminMessageModal();
-            
-            modalContent.appendChild(confirmBtn);
-            modalContent.appendChild(cancelBtn);
-        }
-
-        // Define sample products data (converted to 0-100 scale for storage)
-        const sampleProducts = [
+        // Initial Products Data (used to populate Firestore if empty)
+        const initialProductsData = [
             {
-                id: 'ethiopia-geisha-washed-114g', // Unique ID for Firestore
-                name: "衣索比亞 GEISHA 水洗 (114g)",
-                country: "衣索比亞",
-                variety: "GEISHA",
-                processing: "水洗",
-                altitude: "N/A",
-                weight: "114克",
-                roast: "淺焙",
-                expiry: "2025-10-12",
+                name: '衣索比亞 GEISHA 水洗',
+                country: '衣索比亞',
+                variety: 'GEISHA',
+                processing: '水洗',
+                flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬、百香果',
+                weight: '114克',
+                roast: '淺焙',
+                expiry: '2025-10-12', // YYYY-MM-DD format for date input
                 price: 280,
-                stock: 100,
-                flavor: "接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬、百香果",
-                farm_or_station: "N/A",
-                lifestyle: "適合早晨提神，享受清新花果香，搭配輕食或獨自品味。",
-                profile: [20, 45, 30, 42.5, 25]
+                profile: [30, 90, 60, 95, 40], // Bitterness, Acidity, Body, Floral/Fruity, Nutty/Chocolatey
+                lifestyle: '適合午後細品，享受其豐富的花果香調。',
+                image: 'https://placehold.co/200x120/b58863/ffffff?text=GEISHA+Washed',
+                stock: 10
             },
             {
-                id: 'ethiopia-heirloom-anaerobic-227g',
-                name: "衣索比亞 Heirloom 雙重厭氧水洗 (227g)",
-                country: "衣索比亞",
-                variety: "Heirloom",
-                processing: "雙重厭氧水洗",
-                altitude: "2000-2100公尺",
-                weight: "227克",
-                roast: "淺焙",
-                expiry: "2025-10-28",
+                name: '衣索比亞 Heirloom 雙重厭氧水洗',
+                country: '衣索比亞',
+                variety: 'Heirloom',
+                processing: '雙重厭氧水洗',
+                altitude: '2000-2100公尺',
+                weight: '227克',
+                roast: '淺焙',
+                expiry: '2025-10-28',
                 price: 600,
-                stock: 100,
-                flavor: "茉莉、橙花、蜂蜜、水蜜桃",
-                farm_or_station: "N/A",
-                lifestyle: "適合午後放鬆，感受獨特發酵香氣與甜感，搭配甜點或閱讀。",
-                profile: [15, 40, 35, 47.5, 30]
+                flavor: '茉莉、橙花、蜂蜜、水蜜桃',
+                profile: [40, 85, 70, 90, 50],
+                lifestyle: '清晨的完美開啟，帶您進入清新世界。',
+                image: 'https://placehold.co/200x120/b58863/ffffff?text=Heirloom+Anaerobic',
+                stock: 8
             },
             {
-                id: 'ethiopia-heirloom-anaerobic-227g-batch2',
-                name: "衣索比亞 Heirloom 雙重厭氧水洗 (227g) - 批次2",
-                country: "衣索比亞",
-                variety: "Heirloom",
-                processing: "雙重厭氧水洗",
-                altitude: "2000-2100公尺",
-                weight: "227克",
-                roast: "淺焙",
-                expiry: "2025-10-31",
+                name: '衣索比亞 Heirloom 雙重厭氧水洗 (第二批)',
+                country: '衣索比亞',
+                variety: 'Heirloom',
+                processing: '雙重厭氧水洗',
+                altitude: '2000-2100公尺',
+                weight: '227克',
+                roast: '淺焙',
+                expiry: '2025-10-31',
                 price: 600,
-                stock: 100,
-                flavor: "茉莉、橙花、蜂蜜、水蜜桃",
-                farm_or_station: "N/A",
-                lifestyle: "適合午後放鬆，感受獨特發酵香氣與甜感，搭配甜點或閱讀。",
-                profile: [15, 40, 35, 47.5, 30]
+                flavor: '茉莉、橙花、蜂蜜、水蜜桃',
+                profile: [40, 85, 70, 90, 50],
+                lifestyle: '與好友分享的理想選擇，輕鬆愉悅。',
+                image: 'https://placehold.co/200x120/b58863/ffffff?text=Heirloom+Batch2',
+                stock: 5
             },
             {
-                id: 'ethiopia-geisha-natural-227g',
-                name: "衣索比亞 GEISHA (227g)",
-                country: "衣索比亞",
-                variety: "GEISHA",
-                processing: "日曬",
-                altitude: "N/A",
-                weight: "227克",
-                roast: "中淺焙",
-                expiry: "2025-11-01",
+                name: '衣索比亞 GEISHA 特選',
+                country: '衣索比亞',
+                variety: 'GEISHA',
+                flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬',
+                weight: '227克',
+                roast: '中淺焙',
+                expiry: '2025-11-01',
                 price: 540,
-                stock: 100,
-                flavor: "接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬",
-                farm_or_station: "N/A",
-                lifestyle: "適合日常品飲，風味平衡，可搭配多種餐點或單獨享用。",
-                profile: [25, 35, 37.5, 40, 32.5]
+                profile: [35, 80, 65, 90, 45],
+                lifestyle: '適合在創意發想時品嚐，激發靈感。',
+                image: 'https://placehold.co/200x120/b58863/ffffff?text=GEISHA+Selected',
+                stock: 12
             },
             {
-                id: 'ethiopia-geisha-washed-227g-batch2',
-                name: "衣索比亞 GEISHA 水洗 (227g) - 批次2",
-                country: "衣索比亞",
-                variety: "GEISHA",
-                processing: "水洗",
-                altitude: "2280公尺",
-                weight: "227克",
-                roast: "中淺焙",
-                expiry: "2025-11-01",
+                name: '衣索比亞 GEISHA 水洗 (高海拔)',
+                country: '衣索比亞',
+                variety: 'GEISHA',
+                processing: '水洗',
+                altitude: '2280公尺',
+                flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬',
+                weight: '227克',
+                roast: '中淺焙',
+                expiry: '2025-11-01',
                 price: 540,
-                stock: 100,
-                flavor: "接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬",
-                farm_or_station: "N/A",
-                lifestyle: "適合日常品飲，風味平衡，可搭配多種餐點或單獨享用。",
-                profile: [25, 35, 37.5, 40, 32.5]
+                profile: [35, 80, 65, 90, 45],
+                lifestyle: '獨自閱讀的午後，享受靜謐與香氣。',
+                image: 'https://placehold.co/200x120/b58863/ffffff?text=GEISHA+HighAlt',
+                stock: 7
             },
             {
-                id: 'ethiopia-mixed-natural-227g',
-                name: "衣索比亞 綜合批次 (227g)",
-                country: "衣索比亞",
-                variety: "原生種",
-                processing: "日曬",
-                altitude: "N/A",
-                weight: "227克",
-                roast: "淺焙",
-                expiry: "2025-11-01",
+                name: '衣索比亞 精選原豆',
+                country: '衣索比亞',
+                flavor: '接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬',
+                weight: '227克',
+                roast: '淺焙',
+                expiry: '2025-11-01',
                 price: 540,
-                stock: 100,
-                flavor: "接骨木花、茉莉花橙花、白玫瑰、百合花蘋果、野莓果醬、檸檬",
-                farm_or_station: "N/A",
-                lifestyle: "適合探索多樣風味，體驗衣索比亞咖啡的豐富層次。",
-                profile: [22.5, 42.5, 32.5, 45, 27.5]
+                profile: [30, 85, 60, 90, 40],
+                lifestyle: '適合清新的早晨，喚醒味蕾。',
+                image: 'https://placehold.co/200x120/b58863/ffffff?text=Ethiopia+Selected',
+                stock: 9
             },
             {
-                id: 'costa-rica-geisha-white-honey-114g',
-                name: "哥斯大黎加 Geisha 白蜜 (114g)",
-                country: "哥斯大黎加",
-                variety: "Geisha（藝妓）",
-                processing: "白蜜",
-                altitude: "1950公尺",
-                weight: "114克",
-                roast: "淺焙",
-                expiry: "2025-08-15",
+                name: '哥斯大黎加 Geisha 白蜜',
+                country: '哥斯大黎加',
+                weight: '114克',
+                variety: 'Geisha（藝妓）',
+                roast: '淺',
+                processing: '白蜜',
+                altitude: '1950公尺',
+                farm: '聖伊西多羅',
                 price: 800,
-                stock: 100,
-                flavor: "百合花、野薑花、檸檬草、柑橘、紅色莓果、蜂蜜",
-                farm_or_station: "聖伊西多羅",
-                lifestyle: "適合特殊時刻，細細品味其優雅的花香與甜感，是品鑑級的享受。",
-                profile: [17.5, 47.5, 35, 45, 20]
+                flavor: '百合花、野薑花、檸檬草、柑橘、紅色莓果、蜂蜜',
+                expiry: '2025-08-15',
+                profile: [20, 95, 70, 98, 30],
+                lifestyle: '特殊場合或獨享時光，感受極致風味。',
+                image: 'https://placehold.co/200x120/b58863/ffffff?text=CostaRica+Geisha',
+                stock: 3
             },
             {
-                id: 'costa-rica-geisha-white-honey-227g',
-                name: "哥斯大黎加 Geisha 白蜜 (227g)",
-                country: "哥斯大黎加",
-                variety: "Geisha（藝妓）",
-                processing: "白蜜",
-                altitude: "N/A",
-                weight: "227克",
-                roast: "淺焙",
-                expiry: "2025-08-15",
+                name: '哥斯大黎加 特級藝妓',
+                country: '哥斯大黎加',
+                weight: '227克',
+                roast: '淺',
                 price: 1800,
-                stock: 100,
-                flavor: "百合花、野薑花、檸檬草、柑橘、紅色莓果、蜂蜜",
-                farm_or_station: "N/A",
-                lifestyle: "適合特殊時刻，細細品味其優雅的花香與甜感，是品鑑級的享受。",
-                profile: [17.5, 47.5, 35, 45, 20]
+                flavor: '百合花、野薑花、檸檬草、柑橘、紅色莓果、蜂蜜',
+                expiry: '2025-08-15',
+                profile: [25, 98, 75, 99, 35],
+                lifestyle: '品鑑級享受，不容錯過。',
+                image: 'https://placehold.co/200x120/b58863/ffffff?text=CostaRica+GeishaXL',
+                stock: 2
             }
         ];
 
-        // Function to load all sample products into Firestore
-        function loadSampleProducts() {
-            showAdminMessageModal('確認載入預設品項', '這將會新增多個預設咖啡豆品項到您的資料庫中。您確定要繼續嗎？<br><br><b>注意：此操作會覆蓋現有相同 ID 的資料！</b>', 'info');
-            
-            const modalContent = document.getElementById('adminMessageModal').querySelector('.admin-modal-content');
-            const defaultConfirmBtn = modalContent.querySelector('.btn-primary');
-            defaultConfirmBtn.style.display = 'none';
-
-            const confirmBtn = document.createElement('button');
-            confirmBtn.textContent = '確認載入';
-            confirmBtn.className = 'px-6 py-2 rounded-md btn-primary mt-4 mr-2';
-            confirmBtn.onclick = async () => {
-                if (!isAuthReady) {
-                    showAdminMessageModal('認證中', '請稍候，正在驗證您的身份...', 'info');
-                    closeAdminMessageModal();
-                    return;
+        // Firebase Configuration (from Canvas environment)
+        let firebaseConfig = {};
+        try {
+            if (typeof __firebase_config !== 'undefined' && __firebase_config !== '') {
+                firebaseConfig = JSON.parse(__firebase_config);
+                // Basic validation for essential keys
+                if (!firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId) {
+                    console.error("[Firebase Init Error] __firebase_config is provided but seems incomplete. Please check your Firebase project configuration.");
+                    // Fallback to dummy config to prevent crash, but functionality will be limited
+                    firebaseConfig = {"apiKey": "dummy-api-key", "authDomain": "dummy-auth-domain", "projectId": "dummy-project-id", "storageBucket": "dummy-storage-bucket", "messagingSenderId": "dummy-messaging-sender-id", "appId": "dummy-app-id"};
                 }
-                try {
-                    for (const sample of sampleProducts) {
-                        // Use setDoc with the ID to either add or overwrite
-                        await setDoc(doc(productsCollectionRef, sample.id), sample);
-                    }
-                    showAdminMessageModal('載入完成', `已成功載入 ${sampleProducts.length} 個預設品項！`, 'success');
-                } catch (error) {
-                    console.error("Error loading sample products:", error);
-                    showAdminMessageModal('載入失敗', `載入預設品項失敗：${error.message}`, 'error');
-                }
-                closeAdminMessageModal();
-            };
-
-            const cancelBtn = document.createElement('button');
-            cancelBtn.textContent = '取消';
-            cancelBtn.className = 'px-6 py-2 rounded-md btn-secondary mt-4';
-            cancelBtn.onclick = () => closeAdminMessageModal();
-
-            modalContent.appendChild(confirmBtn);
-            modalContent.appendChild(cancelBtn);
+            } else {
+                console.error("[Firebase Init Error] __firebase_config environment variable is not set or is empty. Firebase will not function correctly.");
+                // Fallback to dummy config to prevent crash
+                firebaseConfig = {"apiKey": "dummy-api-key", "authDomain": "dummy-auth-domain", "projectId": "dummy-project-id", "storageBucket": "dummy-storage-bucket", "messagingSenderId": "dummy-messaging-sender-id", "appId": "dummy-app-id"};
+            }
+        } catch (e) {
+            console.error("[Firebase Init Error] Failed to parse __firebase_config. Ensure it is valid JSON.", e);
+            // Fallback to dummy config to prevent crash
+            firebaseConfig = {"apiKey": "dummy-api-key", "authDomain": "dummy-auth-domain", "projectId": "dummy-project-id", "storageBucket": "dummy-storage-bucket", "messagingSenderId": "dummy-messaging-sender-id", "appId": "dummy-app-id"};
         }
 
-        // Event listener for form submission (Add/Update Product)
-        document.getElementById('product-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        const appId = typeof __app_id !== 'undefined' && __app_id !== '' ? __app_id : 'default-app-id';
 
-            if (!isAuthReady) {
-                showAdminMessageModal('認證中', '請稍候，正在驗證您的身份...', 'info');
-                return;
-            }
+        // Initialize Firebase
+        if (Object.keys(firebaseConfig).length > 0 && firebaseConfig.apiKey !== "dummy-api-key") { // Only initialize if config is likely valid
+            firebaseApp = initializeApp(firebaseConfig);
+            db = getFirestore(firebaseApp);
+            auth = getAuth(firebaseApp);
 
-            // Basic validation for required fields
-            const name = document.getElementById('name').value;
-            const country = document.getElementById('country').value;
-            const variety = document.getElementById('variety').value;
-            const processing = document.getElementById('processing').value;
-            const weight = document.getElementById('weight').value;
-            const roast = document.getElementById('roast').value;
-            const expiry = document.getElementById('expiry').value;
-            const price = parseFloat(document.getElementById('price').value);
-            const stock = parseInt(document.getElementById('stock').value);
-            const flavor = document.getElementById('flavor').value;
+            // Collection reference for products
+            productsCollectionRef = collection(db, `artifacts/${appId}/public/data/coffeeProducts`);
 
-            if (!name || !country || !variety || !processing || !weight || !roast || !expiry || isNaN(price) || isNaN(stock) || !flavor) {
-                showAdminMessageModal('輸入錯誤', '請填寫所有標記 <span class="text-red-500">*</span> 的必填欄位，並確保價格和庫存為有效數字。', 'error');
-                return;
-            }
-
-            const productData = {
-                name: name,
-                country: country,
-                variety: variety,
-                processing: processing,
-                altitude: document.getElementById('altitude').value || 'N/A', // Default if empty
-                weight: weight,
-                roast: roast,
-                expiry: expiry, // YYYY-MM-DD format
-                price: price,
-                stock: stock,
-                flavor: flavor,
-                farm_or_station: document.getElementById('farm_or_station').value || 'N/A', // Default if empty
-                lifestyle: document.getElementById('lifestyle').value || 'N/A', // Default if empty
-                // Convert profile values from 0-5 to 0-100 for storage
-                profile: [
-                    parseFloat(document.getElementById('profile-bitter').value) * 20,
-                    parseFloat(document.getElementById('profile-acidity').value) * 20,
-                    parseFloat(document.getElementById('profile-body').value) * 20,
-                    parseFloat(document.getElementById('profile-floral').value) * 20,
-                    parseFloat(document.getElementById('profile-nutty').value) * 20
-                ]
-            };
-
-            try {
-                if (currentEditingProductId) {
-                    // Update existing product
-                    const docRef = doc(db, `artifacts/${appId}/public/data/coffeeProducts`, currentEditingProductId);
-                    await updateDoc(docRef, productData);
-                    showAdminMessageModal('更新成功', `${productData.name} 已成功更新！`, 'success');
-                } else {
-                    // Add new product
-                    await addDoc(productsCollectionRef, productData);
-                    showAdminMessageModal('新增成功', `${productData.name} 已成功新增！`, 'success');
-                }
-                clearForm(); // Clear form after successful operation
-            } catch (error) {
-                console.error("Error saving product:", error);
-                showAdminMessageModal('操作失敗', `儲存品項失敗：${error.message}`, 'error');
-            }
-        });
-
-        // Event listener for Clear Form button
-        document.getElementById('clear-form-btn').addEventListener('click', clearForm);
-
-        // Event listener for Load Sample Products button
-        document.getElementById('load-sample-products-btn').addEventListener('click', loadSampleProducts);
-
-        // Initialize Firebase and load products on DOMContentLoaded
-        document.addEventListener('DOMContentLoaded', () => {
-            // Firebase Authentication State Change Listener
+            // Authenticate and listen to auth state changes
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
-                    console.log("[Firebase Auth] User is signed in:", user.uid);
-                    isAuthReady = true;
-                    // Start listening to products collection after authentication is ready
-                    const q = query(productsCollectionRef);
-                    onSnapshot(q, (snapshot) => {
-                        globalProductsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                        console.log("[Firestore] Products loaded/updated in real-time:", globalProductsData.length);
-                        renderProductsTable(); // Re-render table on any change
-                    }, (error) => {
-                        console.error("Error fetching real-time products from Firestore:", error);
-                        showAdminMessageModal('資料載入失敗', `無法從資料庫載入咖啡豆資訊：${error.message}`, 'error');
-                    });
-                } else {
-                    console.log("[Firebase Auth] No user signed in. Signing in anonymously...");
-                    try {
-                        // Use __initial_auth_token if available, otherwise sign in anonymously
-                        if (typeof __initial_auth_token !== 'undefined') {
-                            await signInWithCustomToken(auth, __initial_auth_token);
-                        } else {
-                            await signInAnonymously(auth);
+                    currentUserId = user.uid;
+                    console.log(`[Firebase Admin] User signed in: ${user.uid}`);
+                    document.getElementById('admin-login-btn').classList.add('hidden');
+                    document.getElementById('admin-logout-btn').classList.remove('hidden');
+                    document.getElementById('admin-panel').classList.remove('hidden');
+                    document.getElementById('current-user-id').textContent = `使用者 ID: ${user.uid}`;
+
+                    // Start listening to products for admin panel
+                    listenToProducts();
+
+                    // Check if collection is empty and populate if needed (one-time for demo)
+                    const querySnapshot = await getDocs(productsCollectionRef);
+                    if (querySnapshot.empty) {
+                        console.log("[Firebase Admin] Product collection is empty. Populating with initial data.");
+                        for (const productData of initialProductsData) {
+                            await addDoc(productsCollectionRef, productData);
                         }
-                    } catch (error) {
-                        console.error("[Firebase Auth] Anonymous sign-in failed:", error);
-                        showAdminMessageModal('認證錯誤', `無法匿名登入 Firebase：${error.message}`, 'error');
+                        showFrontMessageModal('資料初始化', '咖啡豆資料已成功初始化。', 'success');
                     }
+
+                } else {
+                    currentUserId = null;
+                    console.log("[Firebase Admin] User signed out.");
+                    document.getElementById('admin-login-btn').classList.remove('hidden');
+                    document.getElementById('admin-logout-btn').classList.add('hidden');
+                    document.getElementById('admin-panel').classList.add('hidden');
+                    document.getElementById('current-user-id').textContent = '未登入';
+                    products = []; // Clear products on logout
+                    renderAdminProductList(); // Clear admin product list
                 }
             });
+
+            // Attempt to sign in anonymously or with custom token on load
+            window.addEventListener('load', async () => {
+                let initialAuthToken = null;
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token !== '') {
+                    initialAuthToken = __initial_auth_token;
+                } else {
+                    console.warn("[Firebase Auth] __initial_auth_token environment variable is not set or is empty. Attempting anonymous sign-in.");
+                }
+
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        console.log("[Firebase Admin] Signed in with custom token.");
+                    } else {
+                        await signInAnonymously(auth);
+                        console.log("[Firebase Admin] Signed in anonymously.");
+                    }
+                } catch (error) {
+                    console.error("[Firebase Admin] Authentication error:", error);
+                    showFrontMessageModal('登入錯誤', `無法自動登入：${error.message}`, 'error');
+                }
+            });
+
+        } else {
+            console.warn("[Firebase Admin] Firebase config not found or is invalid. Admin features will be disabled.");
+            document.getElementById('admin-login-btn').textContent = 'Firebase 未啟用';
+            document.getElementById('admin-login-btn').disabled = true;
+            document.getElementById('current-user-id').textContent = 'Firebase 未設定';
+        }
+
+        // Listen for real-time updates to the coffeeProducts collection (Admin)
+        function listenToProducts() {
+            if (!db || !productsCollectionRef) {
+                console.error("Firestore not initialized for admin product listening.");
+                return;
+            }
+
+            const q = query(productsCollectionRef, orderBy('name'));
+
+            onSnapshot(q, (snapshot) => {
+                products = [];
+                snapshot.forEach((docSnap) => {
+                    products.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                console.log("[Firebase Admin] Products updated:", products.length);
+                renderAdminProductList();
+            }, (error) => {
+                console.error("[Firebase Admin] Error listening to products:", error);
+                showFrontMessageModal('資料載入錯誤', `無法載入咖啡豆資料：${error.message}`, 'error');
+            });
+        }
+
+        // Add Product to Firestore
+        async function addProductToFirestore(productData) {
+            if (!productsCollectionRef) {
+                showFrontMessageModal('錯誤', 'Firebase 未正確初始化，無法儲存資料。', 'error');
+                return;
+            }
+            try {
+                await addDoc(productsCollectionRef, productData);
+                showFrontMessageModal('新增成功', `${productData.name} 已成功新增。`, 'success');
+                resetForm();
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                showFrontMessageModal('新增失敗', `新增商品時發生錯誤：${e.message}`, 'error');
+            }
+        }
+
+        // Update Product in Firestore
+        async function updateProductInFirestore(id, productData) {
+            if (!db || !productsCollectionRef) {
+                showFrontMessageModal('錯誤', 'Firebase 未正確初始化，無法更新資料。', 'error');
+                return;
+            }
+            try {
+                const productDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'coffeeProducts', id);
+                await updateDoc(productDocRef, productData);
+                showFrontMessageModal('更新成功', `${productData.name} 已成功更新。`, 'success');
+                resetForm();
+            } catch (e) {
+                console.error("Error updating document: ", e);
+                showFrontMessageModal('更新失敗', `更新商品時發生錯誤：${e.message}`, 'error');
+            }
+        }
+
+        // Delete Product from Firestore
+        async function deleteProductFromFirestore(id) {
+            if (!db || !productsCollectionRef) {
+                showFrontMessageModal('錯誤', 'Firebase 未正確初始化，無法刪除資料。', 'error');
+                return;
+            }
+            try {
+                const productDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'coffeeProducts', id);
+                await deleteDoc(productDocRef);
+                showFrontMessageModal('刪除成功', '商品已成功刪除。', 'success');
+            } catch (e) {
+                console.error("Error deleting document: ", e);
+                showFrontMessageModal('刪除失敗', `刪除商品時發生錯誤：${e.message}`, 'error');
+            }
+        }
+
+        // Renders admin product list
+        function renderAdminProductList() {
+            const productListDiv = document.getElementById('admin-product-list');
+            if (!productListDiv) return;
+
+            productListDiv.innerHTML = ''; // Clear existing content
+            if (products.length === 0) {
+                productListDiv.innerHTML = '<p class="text-gray-500 text-center">目前沒有任何商品。</p>';
+                return;
+            }
+
+            products.forEach(product => {
+                const productCard = `
+                    <div class="bg-white p-4 rounded-lg shadow-md mb-4 flex flex-col md:flex-row items-start md:items-center justify-between border border-gray-200">
+                        <div class="flex-grow mb-4 md:mb-0">
+                            <h4 class="text-lg font-semibold text-primary">${product.name}</h4>
+                            <p class="text-sm text-gray-600">國家: ${product.country || 'N/A'}, 品種: ${product.variety || 'N/A'}</p>
+                            <p class="text-sm text-gray-600">風味: ${product.flavor || 'N/A'}</p>
+                            <p class="text-sm text-gray-600">售價: NT$${product.price !== undefined ? product.price : 'N/A'}, 庫存: ${product.stock !== undefined ? product.stock : 'N/A'}</p>
+                            <p class="text-xs text-gray-500">ID: ${product.id}</p>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                            <button class="btn-secondary px-3 py-1 rounded text-sm edit-btn" data-id="${product.id}">編輯</button>
+                            <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm delete-btn" data-id="${product.id}">刪除</button>
+                        </div>
+                    </div>
+                `;
+                productListDiv.innerHTML += productCard;
+            });
+
+            // Add event listeners for edit and delete buttons after rendering
+            productListDiv.querySelectorAll('.edit-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const id = e.target.dataset.id;
+                    const productToEdit = products.find(p => p.id === id);
+                    if (productToEdit) {
+                        fillFormForEdit(productToEdit);
+                        // Optional: Scroll to form after filling
+                        document.getElementById('product-form').scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+
+            productListDiv.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    // Using custom modal for confirmation instead of alert/confirm
+                    showConfirmationModal('確認刪除', '您確定要刪除此商品嗎？此操作無法復原。', () => {
+                        deleteProductFromFirestore(e.target.dataset.id);
+                    });
+                });
+            });
+        }
+
+        // Custom Confirmation Modal
+        function showConfirmationModal(title, message, onConfirm) {
+            const modal = document.getElementById('frontMessageModal');
+            const modalTitle = document.getElementById('frontModalTitle');
+            const modalMessage = document.getElementById('frontModalMessage');
+            const modalIcon = document.getElementById('frontModalIcon');
+            const confirmButton = document.createElement('button');
+            const cancelButton = document.createElement('button');
+
+            // Clear previous buttons and set up new ones
+            const existingButtons = modal.querySelector('.front-modal-content').querySelectorAll('button');
+            // Remove all buttons except the close button if it exists
+            existingButtons.forEach(btn => {
+                if (!btn.classList.contains('front-modal-close-button')) {
+                    btn.remove();
+                }
+            });
+
+            modalTitle.className = 'text-2xl font-serif mb-4';
+            modalIcon.className = '';
+            modalIcon.innerHTML = '<i class="fas fa-exclamation-triangle icon-error"></i>'; // Warning icon
+            modalTitle.textContent = title;
+            modalMessage.innerHTML = message;
+            modalTitle.classList.add('front-modal-error'); // Warning color
+
+            confirmButton.textContent = '確認';
+            confirmButton.className = 'btn-primary px-6 py-2 rounded-full mx-2';
+            confirmButton.onclick = () => {
+                closeFrontMessageModal();
+                onConfirm(); // Execute the action on confirmation
+            };
+
+            cancelButton.textContent = '取消';
+            cancelButton.className = 'btn-secondary px-6 py-2 rounded-full mx-2';
+            cancelButton.onclick = () => {
+                closeFrontMessageModal();
+            };
+
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'flex justify-center mt-4';
+            buttonContainer.appendChild(confirmButton);
+            buttonContainer.appendChild(cancelButton);
+            modal.querySelector('.front-modal-content').appendChild(buttonContainer);
+
+            modal.classList.add('active');
+        }
+
+
+        // Fills the add/edit form with product data for editing
+        function fillFormForEdit(product) {
+            document.getElementById('product-id').value = product.id;
+            document.getElementById('name-input').value = product.name || '';
+            document.getElementById('country-input').value = product.country || '';
+            document.getElementById('variety-input').value = product.variety || '';
+            document.getElementById('processing-input').value = product.processing || '';
+            document.getElementById('altitude-input').value = product.altitude || '';
+            document.getElementById('weight-input').value = product.weight || '';
+            document.getElementById('roast-input').value = product.roast || '';
+            document.getElementById('expiry-input').value = product.expiry || ''; // Date input expects YYYY-MM-DD
+            document.getElementById('price-input').value = product.price || '';
+            document.getElementById('flavor-input').value = product.flavor || '';
+            document.getElementById('image-input').value = product.image || '';
+            document.getElementById('stock-input').value = product.stock || '';
+            document.getElementById('farm-input').value = product.farm || '';
+            document.getElementById('lifestyle-input').value = product.lifestyle || '';
+
+            // Populate profile values
+            const profile = product.profile || [50, 50, 50, 50, 50];
+            document.getElementById('profile-bitterness').value = profile[0];
+            document.getElementById('profile-acidity').value = profile[1];
+            document.getElementById('profile-body').value = profile[2];
+            document.getElementById('profile-floral').value = profile[3];
+            document.getElementById('profile-nutty').value = profile[4];
+
+            document.getElementById('add-edit-product-title').textContent = '編輯商品';
+            document.getElementById('submit-add-edit-btn').textContent = '更新商品';
+        }
+
+        // Resets the admin form
+        function resetForm() {
+            document.getElementById('product-form').reset();
+            document.getElementById('product-id').value = ''; // Clear hidden ID
+            document.getElementById('add-edit-product-title').textContent = '新增商品';
+            document.getElementById('submit-add-edit-btn').textContent = '新增商品';
+            // Reset profile inputs to default 50
+            document.getElementById('profile-bitterness').value = 50;
+            document.getElementById('profile-acidity').value = 50;
+            document.getElementById('profile-body').value = 50;
+            document.getElementById('profile-floral').value = 50;
+            document.getElementById('profile-nutty').value = 50;
+        }
+
+        // DOMContentLoaded and Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Admin Panel Login/Logout
+            const adminLoginBtn = document.getElementById('admin-login-btn');
+            const adminLogoutBtn = document.getElementById('admin-logout-btn');
+
+            if (adminLoginBtn) {
+                adminLoginBtn.addEventListener('click', async () => {
+                    if (auth) {
+                        try {
+                            await signInAnonymously(auth);
+                            showFrontMessageModal('登入成功', '您已成功登入後台。', 'success');
+                        } catch (error) {
+                            console.error("Error signing in anonymously:", error);
+                            showFrontMessageModal('登入失敗', `無法登入後台：${error.message}`, 'error');
+                        }
+                    } else {
+                        showFrontMessageModal('錯誤', 'Firebase 服務未啟用。', 'error');
+                    }
+                });
+            }
+            
+            if (adminLogoutBtn) {
+                adminLogoutBtn.addEventListener('click', async () => {
+                    if (auth) {
+                        try {
+                            await signOut(auth);
+                            showFrontMessageModal('登出成功', '您已成功登出後台。', 'info');
+                            resetForm(); // Clear form on logout
+                        } catch (error) {
+                            console.error("Error signing out:", error);
+                            showFrontMessageModal('登出失敗', `登出時發生錯誤：${error.message}`, 'error');
+                        }
+                    }
+                });
+            }
+
+            // Product Form Submission (Add/Edit)
+            const productForm = document.getElementById('product-form');
+            if (productForm) {
+                productForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+
+                    const productId = document.getElementById('product-id').value; // Check if editing
+                    const name = document.getElementById('name-input').value;
+                    const country = document.getElementById('country-input').value;
+                    const variety = document.getElementById('variety-input').value;
+                    const processing = document.getElementById('processing-input').value;
+                    const altitude = document.getElementById('altitude-input').value;
+                    const weight = document.getElementById('weight-input').value;
+                    const roast = document.getElementById('roast-input').value;
+                    const expiry = document.getElementById('expiry-input').value;
+                    const price = parseFloat(document.getElementById('price-input').value);
+                    const flavor = document.getElementById('flavor-input').value;
+                    const image = document.getElementById('image-input').value;
+                    const stock = parseInt(document.getElementById('stock-input').value);
+                    const farm = document.getElementById('farm-input').value;
+                    const lifestyle = document.getElementById('lifestyle-input').value;
+
+                    const profile = [
+                        parseInt(document.getElementById('profile-bitterness').value),
+                        parseInt(document.getElementById('profile-acidity').value),
+                        parseInt(document.getElementById('profile-body').value),
+                        parseInt(document.getElementById('profile-floral').value),
+                        parseInt(document.getElementById('profile-nutty').value)
+                    ];
+
+                    const productData = {
+                        name, country, variety, processing, altitude, weight, roast, expiry, price, flavor, image, stock, farm, lifestyle, profile
+                    };
+
+                    if (productId) {
+                        await updateProductInFirestore(productId, productData);
+                    } else {
+                        await addProductToFirestore(productData);
+                    }
+                });
+            }
+
+            // Reset Form Button
+            const resetFormBtn = document.getElementById('reset-form-btn');
+            if (resetFormBtn) {
+                resetFormBtn.addEventListener('click', resetForm);
+            }
         });
     </script>
 </body>
